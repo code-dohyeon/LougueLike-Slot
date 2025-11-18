@@ -516,3 +516,78 @@ body.game-over .game-status {
     transform: none; /* hover 변형 효과 제거 */
     box-shadow: none; /* hover 그림자 효과 제거 */
 }
+
+/* -------------------- */
+/* DAMAGE POPUP STYLES */
+/* -------------------- */
+.damage-popup {
+    /* 💡 PlayerStatus 위에 겹쳐서 표시 */
+    position: absolute; 
+    top: -50px; /* PlayerStatus 위에서 시작 */
+    left: 50%;
+    transform: translateX(-50%);
+    
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    pointer-events: none; /* 클릭 방지 */
+    
+    animation: damageFade 0.8s ease-out forwards;
+}
+
+.player-damage-taken {
+    color: #ef4444; /* Red: 플레이어가 입는 데미지 */
+}
+
+/* 팝업 애니메이션 */
+@keyframes damageFade {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, 0); /* 제자리 */
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50px); /* 위로 솟아오르며 사라짐 */
+    }
+}
+
+/* 몬스터 정보 영역에 팝업을 띄우기 위해 relative 설정 */
+.monster-info {
+    position: relative; 
+    /* 기존 스타일 유지 */
+}
+
+/* 몬스터 피해 팝업 기본 스타일 */
+.damage-popup {
+    position: absolute;
+    top: 50%; /* 몬스터 중앙에서 시작 */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5rem;
+    font-weight: bold;
+    pointer-events: none; /* 다른 요소 클릭 방지 */
+    z-index: 10;
+    opacity: 0; /* 초기 투명 */
+    animation: damageRise 1s ease-out forwards; /* 팝업 애니메이션 적용 */
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.7);
+    white-space: nowrap; /* 숫자가 줄바꿈되지 않게 */
+}
+
+/* 물리 피해 (공격 슬롯) */
+.damage-popup.physical {
+    color: #fca311; /* 주황색 */
+}
+
+/* 독 피해 (독 슬롯 또는 몬스터 턴의 독틱) */
+.damage-popup.poison {
+    color: #4ade80; /* 녹색 */
+    font-size: 2rem; /* 독 피해는 살짝 작게 */
+}
+
+/* 피해 팝업 애니메이션: 위로 떠오르며 사라짐 */
+@keyframes damageRise {
+    0% { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
+    80% { transform: translate(-50%, -150%) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -200%) scale(1.1); opacity: 0; }
+}

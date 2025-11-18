@@ -14,7 +14,7 @@ export const equipment = [
     { id: 'RSC_01', name: '코인', type: 'Resource', base_value: 50, target: 'Player', cost: 0, unlocked: true }, 
 
     // 🗡️ 독 단검 (Attack)
-    { id: 'DGR_01', name: '독 단검', type: 'Attack', base_value: 8, damage_type: 'Poison', cost: 150, unlocked: false }, 
+    { id: 'DGR_01', name: '독 단검', type: 'Attack', base_value: 2, damage_type: 'Poison', cost: 150, unlocked: true }, 
 
     // 🪓 양날 도끼 (Attack)
     { id: 'AXE_01', name: '양날 도끼', type: 'Attack', base_value: 15, damage_type: 'Physical', cost: 300, unlocked: false } 

@@ -3,9 +3,10 @@
 import Player from './player.js';
 import Monster from './monster.js';
 import Item from './item.js';
+// import { totalPhysicalDamage, totalPoisonDamage } from './item.js'
 // 💡 수정: monsters, equipmentMap, equipment를 가져옴
-import { monsters, equipmentMap, equipment } from './data.js'; 
 import SlotMachine from './slotMachine.js';
+import { monsters, equipmentMap, equipment } from './data.js';
 
 class GameManager {
     constructor() {
@@ -47,28 +48,48 @@ class GameManager {
         this.gameState = 'Combat'; // 상태를 Combat으로 전환
     }
 
-    processPlayerTurn() {
+    startTurn() {
         const resultArray = this.slotMachine.spin(this.player.slotCount);
-        this.item.processSlotResult(resultArray, this.currentMonster, this.player);
+        const { totalPhysicalDamage, totalPoisonDamage } = this.item.processSlotResult(resultArray, this.currentMonster, this.player);
 
         if(this.aliveChecked(this.currentMonster)) {
             // 승리 로직
             this.player.gold += 100 + this.stage * 10;
             this.stage++;
             this.gameState = 'ShopPhase'; // 💡 상태를 상점으로 변경
-            return { status: 'win', results: resultArray };
+            return { status: 'win', results: resultArray, damage: { physical: totalPhysicalDamage, poison: totalPoisonDamage } };
         }
         
         // 전투 계속
-        return { status: 'continue', results: resultArray };
+        return { status: 'continue', results: resultArray, damage: { physical: totalPhysicalDamage, poison: totalPoisonDamage } };
     }
 
-    processMonsterTurn() {
-        // 몬스터 공격
-        const actualDamage = this.player.takeDamage(this.currentMonster.atk);
+    // 💡 몬스터 공격 함수 (독 피해 처리를 포함)
+    monsterAttack() { 
+        // 0. 💡 몬스터 턴 시작 시 독 피해 처리 및 승리 체크
+        if (this.currentMonster && this.currentMonster.processStatusEffects) {
+            // 독 피해를 적용하고 몬스터의 HP를 업데이트
+            this.currentMonster.processStatusEffects();
+
+            // 독 피해로 몬스터가 죽었는지 다시 체크
+            if(this.aliveChecked(this.currentMonster)) {
+                this.player.gold += 100 + this.stage * 10;
+                this.stage++;
+                // 몬스터 공격 없이 독 피해로 승리!
+                return { status: 'win', damageTaken: 0 }; 
+            }
+        }
         
+        // 1. 몬스터의 공격
+        const actualDamage = this.player.takeDamage(this.currentMonster.atk);
+
+        // 2. 몬스터 공격력 증가 로직 (있는 경우)
+        if (this.currentMonster.increaseAttack) { 
+            this.currentMonster.increaseAttack(); 
+        }
+        
+        // 3. 패배 체크
         if(this.player.hp <= 0) {
-            console.log("Game Over! 플레이어 사망");
             return { status: 'lose', damageTaken: actualDamage };
         }
 
@@ -76,29 +97,6 @@ class GameManager {
     }
     
     // 💡 플레이어 턴 함수 (나중에 턴 분리를 위해 이 함수를 나눌 예정)
-    startTurn() {
-        // 1. 슬롯 머신 돌리기
-        const resultArray = this.slotMachine.spin(this.player.slotCount);
-        
-        // 2. 슬롯 결과 처리 (Item.js에서 독/물리 속성 처리하도록 수정 예정)
-        this.item.processSlotResult(resultArray, this.currentMonster, this.player);
-
-        // 3. 승리/패배 및 몬스터 공격 확인 (현재는 몬스터 공격이 플레이어 턴 직후에 바로 실행됨)
-        if(this.aliveChecked(this.currentMonster)) {
-            this.player.gold += 100 + this.stage * 10;
-            this.stage++;
-            return { status: 'win', results: resultArray };
-        }
-        
-        // 몬스터의 공격 (나중에 몬스터 턴으로 분리해야 할 부분!)
-        const actualDamage = this.player.takeDamage(this.currentMonster.atk);
-
-        if(this.player.hp <= 0) {
-            return { status: 'lose', results: resultArray };
-        }
-
-        return { status: 'continue', results: resultArray };
-    }
 
     prepareNextCombat() {
         const randomIndex = Math.floor(Math.random() * monsters.length);
