@@ -38,23 +38,39 @@ class Monster {
         }
     }
 
-    // 💡 새로운 기능 2: 몬스터 턴이 시작될 때 상태 효과를 처리하고 피해를 주는 메소드 (이 로직은 그대로 유지)
+    // 💡 몬스터 턴 시작 시 상태 효과 처리 (독 피해 20% 감소 로직 적용)
     processStatusEffects() {
-        // ... (기존 로직 그대로)
         let totalDamage = 0;
         
         this.statusEffects = this.statusEffects.filter(effect => {
             if (effect.type === 'Poison') {
-                const damage = effect.damage;
-                this.hp -= damage;
-                totalDamage += damage;
-                effect.duration--; 
                 
-                console.log(`[독 피해] ${this.type}이(가) 독으로 ${damage} 피해를 입었습니다. (남은 턴: ${effect.duration})`);
+                const appliedDamage = Math.floor(effect.damage); 
                 
-                return effect.duration > 0;
+                if (appliedDamage <= 0) {
+                    return false; // 피해량이 0 이하면 제거
+                }
+                
+                this.hp -= appliedDamage; // 몬스터 HP 감소!
+                totalDamage += appliedDamage;
+                
+                // 💡 [요청 반영] 독 데미지 20% 감소 (다음 턴 예상 피해량 업데이트)
+                effect.damage *= 0.8; 
+                
+                const shouldKeep = effect.damage >= 1; // 1 미만이면 제거
+                
+                if (!shouldKeep) {
+                     console.log(`[독 제거] ${this.type}의 독 효과가 피해량 감소로 제거되었습니다.`);
+                } else {
+                    console.log(`[독 피해] ${this.type}이(가) 독으로 ${appliedDamage} 피해를 입었습니다. (다음 턴 예상 피해량: ${effect.damage.toFixed(2)})`);
+                }
+                
+                return shouldKeep;
             }
-            return true;
+            
+            // 독 외 다른 상태 효과는 기존 duration 기반 로직 유지
+            effect.duration--;
+            return effect.duration > 0;
         });
 
         return totalDamage; 

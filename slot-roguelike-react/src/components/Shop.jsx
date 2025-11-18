@@ -1,10 +1,13 @@
 // src/components/Shop.jsx
 
 import React from 'react';
+import { useGame } from '../hooks/useGame';
 
 function Shop({ player, stage, onUpgradeHp, onUpgradeSlot, onNextStage }) {
     // 💡 슬롯 개수가 최대치(5)인지 확인하는 로직
     const isSlotMaxed = player.slotCount >= 5;
+    const { getShopItems, handleBuyWeapon, handleUpgradeWeapons, playerState } = useGame();
+    const shopItems = getShopItems();
 
     return (
         <div id="shop-container" className="shop-container">
@@ -41,6 +44,19 @@ function Shop({ player, stage, onUpgradeHp, onUpgradeSlot, onNextStage }) {
                     {isSlotMaxed && ' (최대치)'}
                 </button>
             </div>
+
+            <button onClick={handleUpgradeWeapons}>
+                전체 무기 업그레이드 (150 골드)
+            </button>
+            
+            <h3>구매 가능 무기</h3>
+            {shopItems.map(item => (
+                <div key={item.id}>
+                    {item.name} ({item.base_value} {item.damage_type}) - {item.cost} 골드 
+                    <button onClick={() => handleBuyWeapon(item.id)}>구매 및 장착</button>
+                </div>
+            ))}
+            
 
             {/* 다음 스테이지 버튼 */}
             <button 

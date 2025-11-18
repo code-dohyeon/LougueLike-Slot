@@ -35,11 +35,11 @@ class Item {
                         // 몬스터에게 독 상태 효과 적용
                         target.applyStatusEffect({
                             type: 'Poison',
-                            damage: item.base_value, // 독 피해량 (고정)
+                            damage: damageValue, // 독 피해량 (고정)
                             duration: 3  // 독 지속 턴 (고정)
                         });
 
-                        totalPoisonDamage += 5;
+                        totalPoisonDamage += damageValue;
                         // console.log(`[독 공격] ${target.type}에게 독 상태를 적용합니다!`);
                         
                     } else if (item.damage_type === 'Physical') {
@@ -53,6 +53,7 @@ class Item {
                         target.hp -= damageValue;
                         console.log(`${target.type}에게 ${damageValue}만큼의 일반 공격!`);
                     }
+                    break;
 
                 case 'Defense':
                     player.df += resultArray[i].base_value * this.multiplier;
@@ -65,6 +66,7 @@ class Item {
                     player.gold += resultArray[i].base_value * this.multiplier;
                     console.log(`플레이어에게 ${resultArray[i].base_value}만큼의 골드 추가!`);
                     console.log(`플레이어의 Gold:${player.gold}`);
+
                     break;
             }
             console.log('\n\n');
