@@ -3,7 +3,7 @@
 import React from 'react';
 
 function PlayerStatus({ player, stage, onRestart }) {
-    const hpPercent = (player.hp / player.maxHP) * 100;
+    const hpPercent = Math.max(0, (player.hp / player.maxHP) * 100);
     const hpColor = hpPercent > 50 ? '#4ade80' : hpPercent > 20 ? '#fbbf24' : '#ef4444';
 
     return (

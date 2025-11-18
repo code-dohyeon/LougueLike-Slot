@@ -26,14 +26,21 @@ function SlotReel({ item, isSpinning, emojiMap, isProcessing }) {
             setDisplayContent('❓');
         }
 
+        if (isProcessing) {
+            console.log(`릴 ${item.type}이(가) 처리 중입니다! (isProcessing: ${isProcessing})`);
+        }
+
         return () => clearInterval(interval); // 컴포넌트가 사라지거나 상태가 바뀔 때 인터벌 해제
     }, [isSpinning, item, emojiMap]);
+
 
     const slotClass = [
         'slot-reel-container', 
         item && item.type ? `slot-type-${item.type.toLowerCase()}` : '',
         isProcessing ? 'is-processing' : '' // 💡 핵심! 이 클래스를 CSS에서 사용
     ].join(' ');
+
+    // console.log(isProcessing);
 
     return (
         <div className={slotClass}>
@@ -42,13 +49,7 @@ function SlotReel({ item, isSpinning, emojiMap, isProcessing }) {
             </div>
             
             {/* 💡 (선택 사항) 이펙트가 발동될 때 데미지 팝업을 릴 아래에 보여줄 수도 있습니다. */}
-            {isProcessing && (
-                <div className="action-effect">
-                    {item.type === 'Attack' && '⚡️ ATK!'}
-                    {item.type === 'Defense' && '🛡️ DEF!'}
-                    {item.type === 'Resource' && '💰 GOLD!'}
-                </div>
-            )}
+
         </div>
     );
 }

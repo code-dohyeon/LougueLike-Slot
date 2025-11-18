@@ -32,6 +32,7 @@ function App() {
         getShopItems,
         handleBuyWeapon,
         handleUpgradeWeapons,
+        currentlyProcessingSlotIndex
     } = useGame();
     
     React.useEffect(() => {
@@ -79,6 +80,7 @@ function App() {
                                     slotCount={playerState.slotCount}
                                     slotResults={slotResults}
                                     isSpinning={isSpinning}
+                                    currentlyProcessingSlotIndex={currentlyProcessingSlotIndex}
                                 />
                                 
                                 <SpinButton 

@@ -3,21 +3,8 @@ class Item {
         this.multiplier = 1.0;
     }
 
-    processSlotResult(resultArray, target, player) {
-        let comboCheck = 0;
-        
-        for(let i = 0; i < resultArray.length - 1; i++) {
-            if(resultArray[i] === resultArray[i+1]) {
-                comboCheck++;
-                if(comboCheck >= 2) {
-                    this.multiplier = 3.0;
-                    break;
-                }
-            }
-            else comboCheck = 0;
-        }
-        
-        this.multiplier = comboCheck >= 2 ? 3.0 : 1.0;
+    processSlotResult(resultArray, target, player, multiplier) {
+        this.multiplier = multiplier;
 
 
         let totalPhysicalDamage = 0;

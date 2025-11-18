@@ -45,64 +45,40 @@ class GameManager {
         return 1.0; // 콤보 없음
     }
 
-    // 💡 [새 함수] 단일 슬롯 결과를 처리하고 결과를 반환 (상태 변경 포함)
-    processSingleSlotResult(resultItem, multiplier) {
-        const damageValue = resultItem.base_value * multiplier;
-        let logMessage = '';
-        let physicalDamage = 0;
-        let isPoison = false;
-
-        switch(resultItem.type) {
-            case 'Attack':
-                if (resultItem.damage_type === 'Poison') {
-                    this.currentMonster.applyStatusEffect({ type: 'Poison', damage: damageValue, duration: 3 });
-                    logMessage = `${resultItem.name}(독)으로 독 효과 적용`;
-                    isPoison = true;
-                } else {
-                    this.currentMonster.hp -= damageValue;
-                    logMessage = `${resultItem.name}으로 ${this.currentMonster.type}에게 ${damageValue} 피해!`;
-                    physicalDamage = damageValue;
-                }
-                break;
-
-            case 'Defense':
-                this.player.df += damageValue;
-                logMessage = `${resultItem.name}으로 방어력 ${damageValue} 증가!`;
-                break;
-
-            case 'Resource':
-                this.player.gold += damageValue;
-                logMessage = `${resultItem.name}으로 ${damageValue} 골드 획득!`;
-                break;
-        }
+    // 💡 [새 함수] 단일 슬롯 결과 처리 함수 (useGame.js에서 호출)
+    processSingleSlotResult(itemResult, multiplier) {
+        // item.js의 processSlotResult는 배열을 받으므로, 단일 아이템을 배열로 감싸서 전달
+        // player와 currentMonster는 GameManager에서 관리
+        const actionResult = this.item.processSlotResult(
+            [itemResult],          // 단일 아이템을 배열로 감싸서 전달
+            this.currentMonster,   // target
+            this.player,           // player
+            multiplier             // 계산된 콤보 배율 전달
+        );
         
-        // 몬스터 사망 체크
-        const isMonsterDead = this.aliveChecked(this.currentMonster);
-
-        return {
-            success: true,
-            message: logMessage,
-            physicalDamage: physicalDamage,
-            isPoison: isPoison,
-            isDead: isMonsterDead,
-            // 몬스터의 현재 상태를 반환하여 UI에 반영할 수 있도록 함
+        // Item.js의 반환값: {totalPhysicalDamage: number, totalPoisonDamage: number}
+        // useGame.js에서 필요한 팝업 정보만 추출하여 반환
+        return { 
+            physicalDamage: actionResult.totalPhysicalDamage, 
+            // totalPoisonDamage가 0보다 크면 독이 적용된 것으로 간주
+            poisonApplied: actionResult.totalPoisonDamage > 0 
         };
     }
 
-    // 💡 [수정] 턴을 시작하고 결과를 계산만 해서 반환 (실제 적용은 useGame.js가 순차적으로 함)
-    startPlayerTurn() {
-        const slotCount = this.player.equippedWeapons.length || 3;
-        const resultArray = this.slotMachine.spin(slotCount);
+    // // 💡 [수정] 턴을 시작하고 결과를 계산만 해서 반환 (실제 적용은 useGame.js가 순차적으로 함)
+    // startPlayerTurn() {
+    //     const slotCount = this.player.equippedWeapons.length || 3;
+    //     const resultArray = this.slotMachine.spin(slotCount);
         
-        // 콤보 배율 계산 (결과가 전부 나온 후 계산)
-        const multiplier = this.calculateMultiplier(resultArray); 
+    //     // 콤보 배율 계산 (결과가 전부 나온 후 계산)
+    //     const multiplier = this.calculateMultiplier(resultArray); 
         
-        // 결과와 배율을 반환
-        return {
-            results: resultArray,
-            multiplier: multiplier
-        };
-    }
+    //     // 결과와 배율을 반환
+    //     return {
+    //         results: resultArray,
+    //         multiplier: multiplier
+    //     };
+    // }
 
     aliveChecked(monster) {
         if(monster.hp <= 0) {
@@ -126,54 +102,74 @@ class GameManager {
         this.gameState = 'Combat'; // 상태를 Combat으로 전환
     }
 
-    startTurn() {
-        const resultArray = this.slotMachine.spin(this.player.slotCount);
-        const { totalPhysicalDamage, totalPoisonDamage } = this.item.processSlotResult(resultArray, this.currentMonster, this.player);
+    // startTurn() {
+    //     const resultArray = this.slotMachine.spin(this.player.slotCount);
+    //     const { totalPhysicalDamage, totalPoisonDamage } = this.item.processSlotResult(resultArray, this.currentMonster, this.player);
 
-        if(this.aliveChecked(this.currentMonster)) {
-            // 승리 로직
-            this.player.gold += 100 + this.stage * 10;
-            this.stage++;
-            this.gameState = 'ShopPhase'; // 💡 상태를 상점으로 변경
-            return { status: 'win', results: resultArray, damage: { physical: totalPhysicalDamage, poison: totalPoisonDamage } };
-        }
+    //     if(this.aliveChecked(this.currentMonster)) {
+    //         // 승리 로직
+    //         this.player.gold += 100 + this.stage * 10;
+    //         this.stage++;
+    //         this.gameState = 'ShopPhase'; // 💡 상태를 상점으로 변경
+    //         return { status: 'win', results: resultArray, damage: { physical: totalPhysicalDamage, poison: totalPoisonDamage } };
+    //     }
         
-        // 전투 계속
-        return { status: 'continue', results: resultArray, damage: { physical: totalPhysicalDamage, poison: totalPoisonDamage } };
+    //     // 전투 계속
+    //     return { status: 'continue', results: resultArray, damage: { physical: totalPhysicalDamage, poison: totalPoisonDamage } };
+    // }
+    
+    // 💡 [새 함수] 몬스터 처치 시 보상 및 상태 업데이트
+    handleMonsterDefeat() {
+        if (!this.currentMonster || this.currentMonster.hp > 0) {
+            console.error("ERROR: 몬스터가 살아있거나 존재하지 않습니다. 이 함수는 몬스터 사망 후에 호출되어야 합니다.");
+            return;
+        }
+
+        // 1. 보상 획득 (골드)
+        this.player.gold += 100 + this.stage * 10;
+        
+        // 2. 스테이지 증가
+        this.stage++;
+
+        // 3. 게임 상태 전환
+        this.gameState = 'ShopPhase'; 
+
+        // 4. (선택 사항) 몬스터 정보 초기화 (새로운 몬스터는 상점 다음 단계에서 준비됨)
+        this.currentMonster = null; 
+        
+        console.log(`STAGE ${this.stage - 1} 클리어! 상점 페이즈로 이동합니다. (획득 골드: ${100 + (this.stage - 1) * 10})`);
     }
 
-    processMonsterPoisonDamage() {
-        if (!this.currentMonster || !this.currentMonster.processStatusEffects) {
-            return { status: 'continue', poisonDamage: 0 };
-        }
+    // processMonsterPoisonDamage() {
+    //     if (!this.currentMonster || !this.currentMonster.processStatusEffects) {
+    //         return { status: 'continue', poisonDamage: 0 };
+    //     }
         
-        const poisonDamage = this.currentMonster.processStatusEffects();
+    //     const poisonDamage = this.currentMonster.processStatusEffects();
 
-        // 독 피해로 몬스터가 죽었는지 체크
-        if(this.aliveChecked(this.currentMonster)) {
-            // 승리 로직
-            this.player.gold += 100 + this.stage * 10;
-            this.stage++;
-            this.gameState = 'ShopPhase';
-            return { status: 'win', poisonDamage: poisonDamage };
-        }
+    //     // 독 피해로 몬스터가 죽었는지 체크
+    //     if(this.aliveChecked(this.currentMonster)) {
+    //         // 승리 로직
+    //         this.player.gold += 100 + this.stage * 10;
+    //         this.stage++;
+    //         this.gameState = 'ShopPhase';
+    //         return { status: 'win', poisonDamage: poisonDamage };
+    //     }
 
-        return { status: 'continue', poisonDamage: poisonDamage };
-    }
+    //     return { status: 'continue', poisonDamage: poisonDamage };
+    // }
 
     // 💡 [수정] 몬스터의 독 피해 처리와 일반 공격을 모두 수행하는 통합 함수
     monsterAttack() { 
-        let totalPoisonDamage = 0; // 💡 UI 팝업을 위해 독 피해량 추적
+        let totalPoisonDamage = 0;
 
-        // 0. 💡 [요구사항 반영] 몬스터 턴 시작 시 독 피해 처리 (공격 성공 여부와 상관없음)
+        // 0. 몬스터 턴 시작 시 독 피해 처리
         if (this.currentMonster && this.currentMonster.processStatusEffects) {
-            totalPoisonDamage = this.currentMonster.processStatusEffects(); // <-- 독 피해량 저장
-            
+            totalPoisonDamage = this.currentMonster.processStatusEffects();
+
             // 독 피해로 몬스터가 죽었는지 체크
             if(this.aliveChecked(this.currentMonster)) {
-                this.player.gold += 100 + this.stage * 10;
-                this.stage++;
-                this.gameState = 'ShopPhase'; // 독 피해로 인한 승리
+                this.handleMonsterDefeat(); // 💡 승리 로직을 새로 만든 함수로 대체!
                 // 💡 승리 시 독 피해량과 status: 'win' 반환
                 return { status: 'win', damageTaken: 0, poisonDamage: totalPoisonDamage }; 
             }
