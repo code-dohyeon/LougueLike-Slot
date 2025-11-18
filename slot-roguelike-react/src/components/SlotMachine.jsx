@@ -10,17 +10,21 @@ const itemEmogiMap = {
     'Resource': '💰'
 };
 
-function SlotMachine({ slotCount, slotResults, isSpinning }) {
+function SlotMachine({ slotCount, slotResults, isSpinning, currentlyProcessingSlotIndex }) {
     // 💡 Array.from을 사용하여 slotCount만큼 릴 배열을 생성하고 순회
     const reels = Array.from({ length: slotCount }, (_, index) => {
         // 결과 배열에서 해당 릴의 결과 아이템을 가져옴
         const itemResult = slotResults ? slotResults[index] : null; 
         
+        // 💡 현재 릴이 처리 중인지 확인하는 변수
+        const isProcessing = index === currentlyProcessingSlotIndex; 
+
         return (
             <SlotReel
-                key={index} // React에서 반복문 렌더링 시 필수
+                key={index}
                 item={itemResult}
                 isSpinning={isSpinning}
+                isProcessing={isProcessing} // 💡 SlotReel에 prop 전달
                 emojiMap={itemEmogiMap}
             />
         );

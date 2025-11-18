@@ -26,6 +26,84 @@ class GameManager {
         this.gameState = 'InitialSetup'; 
     }
 
+    // 💡 [새 함수] 슬롯 결과 배열을 받아 콤보 배율을 계산합니다.
+    calculateMultiplier(resultArray) {
+        let comboCheck = 0;
+        
+        for(let i = 0; i < resultArray.length - 1; i++) {
+            // 💡 콤보는 타입이 연속으로 3개 이상 같을 때 (즉, 2번 연속 같으면)로 가정합니다.
+            if(resultArray[i].type === resultArray[i+1].type) { 
+                comboCheck++;
+                if(comboCheck >= 2) { // 3개 연속
+                    return 3.0; 
+                }
+            } else {
+                comboCheck = 0;
+            }
+        }
+        
+        return 1.0; // 콤보 없음
+    }
+
+    // 💡 [새 함수] 단일 슬롯 결과를 처리하고 결과를 반환 (상태 변경 포함)
+    processSingleSlotResult(resultItem, multiplier) {
+        const damageValue = resultItem.base_value * multiplier;
+        let logMessage = '';
+        let physicalDamage = 0;
+        let isPoison = false;
+
+        switch(resultItem.type) {
+            case 'Attack':
+                if (resultItem.damage_type === 'Poison') {
+                    this.currentMonster.applyStatusEffect({ type: 'Poison', damage: damageValue, duration: 3 });
+                    logMessage = `${resultItem.name}(독)으로 독 효과 적용`;
+                    isPoison = true;
+                } else {
+                    this.currentMonster.hp -= damageValue;
+                    logMessage = `${resultItem.name}으로 ${this.currentMonster.type}에게 ${damageValue} 피해!`;
+                    physicalDamage = damageValue;
+                }
+                break;
+
+            case 'Defense':
+                this.player.df += damageValue;
+                logMessage = `${resultItem.name}으로 방어력 ${damageValue} 증가!`;
+                break;
+
+            case 'Resource':
+                this.player.gold += damageValue;
+                logMessage = `${resultItem.name}으로 ${damageValue} 골드 획득!`;
+                break;
+        }
+        
+        // 몬스터 사망 체크
+        const isMonsterDead = this.aliveChecked(this.currentMonster);
+
+        return {
+            success: true,
+            message: logMessage,
+            physicalDamage: physicalDamage,
+            isPoison: isPoison,
+            isDead: isMonsterDead,
+            // 몬스터의 현재 상태를 반환하여 UI에 반영할 수 있도록 함
+        };
+    }
+
+    // 💡 [수정] 턴을 시작하고 결과를 계산만 해서 반환 (실제 적용은 useGame.js가 순차적으로 함)
+    startPlayerTurn() {
+        const slotCount = this.player.equippedWeapons.length || 3;
+        const resultArray = this.slotMachine.spin(slotCount);
+        
+        // 콤보 배율 계산 (결과가 전부 나온 후 계산)
+        const multiplier = this.calculateMultiplier(resultArray); 
+        
+        // 결과와 배율을 반환
+        return {
+            results: resultArray,
+            multiplier: multiplier
+        };
+    }
+
     aliveChecked(monster) {
         if(monster.hp <= 0) {
             return true;
@@ -50,10 +128,8 @@ class GameManager {
 
     startTurn() {
         const resultArray = this.slotMachine.spin(this.player.slotCount);
-        const { totalPhysicalDamage, totalPoisonDamage, gold } = this.item.processSlotResult(resultArray, this.currentMonster, this.player);
+        const { totalPhysicalDamage, totalPoisonDamage } = this.item.processSlotResult(resultArray, this.currentMonster, this.player);
 
-
-        
         if(this.aliveChecked(this.currentMonster)) {
             // 승리 로직
             this.player.gold += 100 + this.stage * 10;
@@ -125,9 +201,42 @@ class GameManager {
     // 💡 플레이어 턴 함수 (나중에 턴 분리를 위해 이 함수를 나눌 예정)
 
     prepareNextCombat() {
-        const randomIndex = Math.floor(Math.random() * monsters.length);
-        const monsterData = monsters[randomIndex];
+        // 1. 현재 스테이지에 해당하는 몬스터 Tier 결정
+        // 예시 규칙: 1-3 스테이지: Tier 1, 4-6 스테이지: Tier 2, 7-9 스테이지: Tier 3...
+        // 💡 3스테이지마다 난이도가 올라가게 계산
+        // Math.ceil(1/3)=1, Math.ceil(3/3)=1, Math.ceil(4/3)=2
+        const requiredTier = Math.ceil(this.stage / 3); 
+        
+        // 2. 해당 Tier에 맞는 몬스터 목록 필터링
+        // 💡 몬스터 목록에서 requiredTier와 tier 값이 같은 몬스터만 선택
+        const suitableMonsters = monsters.filter(m => m.tier === requiredTier);
+        
+        // 🚨 예외 처리: 만약 해당 Tier에 몬스터가 없다면? (예: 모든 Tier 5 몬스터를 다 깼다면)
+        if (suitableMonsters.length === 0) {
+            console.warn(`Tier ${requiredTier}에 해당하는 몬스터가 없습니다! 마지막 Tier 몬스터 중에서 랜덤 선택을 시도합니다.`);
+            // 대안: 그냥 전체 몬스터 중에서 랜덤 선택하거나, 마지막 Tier 몬스터 중에서 고르게 할 수 있음.
+            const lastTier = monsters.reduce((max, m) => Math.max(max, m.tier || 0), 0);
+            const fallbackMonsters = monsters.filter(m => m.tier === lastTier);
 
+            if (fallbackMonsters.length > 0) {
+                return this._selectAndScaleMonster(fallbackMonsters); // 💡 아래 별도 함수로 분리 제안
+            } else {
+                console.error("게임을 진행할 몬스터가 없습니다!");
+                this.gameState = 'GameOver'; // 몬스터가 없으면 게임 오버나 엔딩으로 처리
+                return;
+            }
+        }
+
+        // 3. 필터링된 목록에서 몬스터 선택 및 스케일링
+        this._selectAndScaleMonster(suitableMonsters);
+    }
+
+    // 💡 (새 함수 제안) 몬스터 선택 및 HP 스케일링 로직을 분리하여 재사용성 높임
+    _selectAndScaleMonster(monsterList) {
+        const randomIndex = Math.floor(Math.random() * monsterList.length);
+        const monsterData = monsterList[randomIndex];
+
+        // 💡 스케일링 로직은 그대로 유지 (스테이지가 높아지면 HP가 증가)
         const scaledHp = monsterData.hp + (this.stage - 1) * 10;
 
         // 몬스터의 MaxHP와 현재 HP를 동기화하여 생성
@@ -152,16 +261,16 @@ class GameManager {
         
         // 2. 골드 확인
         console.log(this.player.gold);
-        if (this.player.gold < itemData.cost) {
-            return { success: false, message: `골드가 부족합니다! (필요 골드: ${itemData.cost})` };
-        }
+        // if (this.player.gold < itemData.cost) {
+        //     return { success: false, message: `골드가 부족합니다! (필요 골드: ${itemData.cost})` };
+        // }
         
-        // 3. 슬롯 공간 확인
-        // (Player의 slotCount는 useGame.js의 upgradeSlotCount 로직에 따라 최대 5개로 늘어날 수 있음)
-        if (this.player.equippedWeapons.length >= this.player.slotCount) {
-             // 🚨 현재 슬롯이 꽉 찼을 때 교체 로직은 UI에서 처리해야 하므로, 일단 구매 불가 처리
-             return { success: false, message: '슬롯이 꽉 찼습니다. 기존 무기를 제거하거나 슬롯을 늘려주세요.' };
-        }
+        // // 3. 슬롯 공간 확인
+        // // (Player의 slotCount는 useGame.js의 upgradeSlotCount 로직에 따라 최대 5개로 늘어날 수 있음)
+        // if (this.player.equippedWeapons.length >= this.player.slotCount) {
+        //      // 🚨 현재 슬롯이 꽉 찼을 때 교체 로직은 UI에서 처리해야 하므로, 일단 구매 불가 처리
+        //      return { success: false, message: '슬롯이 꽉 찼습니다. 기존 무기를 제거하거나 슬롯을 늘려주세요.' };
+        // }
         
         // 4. 구매 및 장착
         this.player.gold -= itemData.cost; // 골드 차감

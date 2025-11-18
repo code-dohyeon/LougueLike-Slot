@@ -1,7 +1,6 @@
 // src/hooks/useGame.js
 
 import { useState, useMemo } from 'react';
-// 💡 로직 파일 경로 수정: ./logic 폴더에서 가져옴
 import GameManager from '../logic/gameManager'; 
 import { useCallback } from 'react';
 
@@ -10,6 +9,7 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // 턴 딜레이 상수 (index.js에서 가져옴)
 const PLAYER_TURN_DELAY = 1000;
 const MONSTER_TURN_DELAY = 1000; 
+const ACTION_DELAY = 500;
 
 export const useGame = () => {
     // 💡 GameManager 인스턴스는 단 한 번만 생성
@@ -26,6 +26,9 @@ export const useGame = () => {
     const [isSpinning, setIsSpinning] = useState(false); // 버튼 비활성화용
     const [damageTaken, setDamageTaken] = useState(0); // 몬스터 공격 데미지 표시용 (애니메이션)
     
+    // 💡 [새 상태] 현재 액션을 처리 중인 슬롯의 인덱스 (-1은 처리 중 아님)
+    const [currentlyProcessingSlotIndex, setCurrentlyProcessingSlotIndex] = useState(-1);
+
     // 💡 GameManager의 상태를 React 상태로 동기화하는 핵심 함수
     const syncGameState = () => {
         setGameState(game.gameState);
@@ -34,31 +37,6 @@ export const useGame = () => {
         setMonsterState(game.currentMonster ? { ...game.currentMonster } : null); 
         setStage(game.stage);
     };
-
-    // ----------------------------------------------------
-    // 턴 로직 (바닐라 JS의 턴 로직을 가져와 Promise/setTimeout으로 변환)
-    // ----------------------------------------------------
-
-    // 몬스터 턴 처리
-    // const processMonsterTurn = () => {
-    //     setIsSpinning(true); // 몬스터 턴이 끝날 때까지 스핀 버튼 비활성화 유지
-        
-    //     setTimeout(() => {
-    //         // GameManager에서 몬스터 공격 로직 실행
-    //         const { status, damageTaken: actualDamage } = game.processMonsterTurn();
-            
-    //         setDamageTaken(actualDamage); // 데미지 상태 업데이트 (UI 애니메이션용)
-    //         syncGameState(); // 몬스터 공격 결과 반영 (HP 감소 등)
-
-    //         if (status === 'lose') {
-    //             // 게임 오버 처리
-    //             setGameState('GameOver');
-    //         } else {
-    //             // 전투 계속: 다음 턴 준비 완료
-    //             setIsSpinning(false);
-    //         }
-    //     }, MONSTER_TURN_DELAY); 
-    // };
 
     const handleMonsterTurn = useCallback(async () => {
         // 💡 몬스터 독 피해 처리
@@ -79,10 +57,6 @@ export const useGame = () => {
         // ... (패배 처리 로직)
     
 }, [syncGameState]); // `useGame.js` snippet에는 handleMonsterTurn이 없지만, 로직 흐름상 이렇게 되어야 함
-
-    // 플레이어 턴 처리
-    // 💡 startPlayerTurn 함수 (async/await 적용)
-    // src/hooks/useGame.js - startPlayerTurn 함수만 수정
 
 const startPlayerTurn = useCallback(async (slotCount) => {
     if (isSpinning || gameState !== 'Combat') return;
@@ -137,8 +111,14 @@ const startPlayerTurn = useCallback(async (slotCount) => {
             value: Math.floor(damage.totalPhysicalDamage), // item.js에서 반환된 물리 피해 사용
             type: 'physical' 
         });
+        
+        const monsterElement = document.getElementById('game-status');
+        if (monsterElement) {
+            monsterElement.classList.add('monster-hit');
+            setTimeout(() => monsterElement.classList.remove('monster-hit'), 400);
+        }
     }
-    // 💡 [수정] totalPoisonDamage가 0보다 크면 독이 적용된 것으로 간주
+    
     if(damage.totalPoisonDamage > 0) { 
         popups.push({ 
             id: Date.now() + 2, 
@@ -213,6 +193,19 @@ const startPlayerTurn = useCallback(async (slotCount) => {
     // ============================================
     console.log('✅ === 턴 종료 ===\n');
     
+    const shieldElement = document.getElementById('player-df');
+    const goldElement = document.getElementById('player-gold');
+    
+    if (shieldElement && damage.totalDefense > 0) {
+        shieldElement.classList.add('shield-gain');
+        setTimeout(() => shieldElement.classList.remove('shield-gain'), 600);
+    }
+    
+    if (goldElement && damage.totalResource > 0) {
+        goldElement.classList.add('gold-gain');
+        setTimeout(() => goldElement.classList.remove('gold-gain'), 600);
+    }
+
 }, [gameState, isSpinning, game, syncGameState])
 
     // ----------------------------------------------------
@@ -285,20 +278,69 @@ const startPlayerTurn = useCallback(async (slotCount) => {
         return result.success;
     };
 
-    
+    const handleSpin = useCallback(async () => {
+        if (isSpinning || gameState !== 'Combat') return;
+        setIsSpinning(true);
 
-    // 💡 [새 함수] 무기 업그레이드
-    const handleUpgradeWeapons = () => {
-        const result = game.upgradeWeapons();
-        
-        if (result.success) {
-            alert(result.message);
-        } else {
-            alert(`업그레이드 실패: ${result.message}`);
+        try {
+            // 1. 슬롯 돌리기 및 결과/배율 계산 (GameManager의 startPlayerTurn 사용)
+            const turnData = game.startPlayerTurn(); 
+            const results = turnData.results;
+            const multiplier = turnData.multiplier;
+            
+            // 2. 슬롯 결과 표시 (애니메이션이 재생된다고 가정)
+            setSlotResults(results);
+            await delay(PLAYER_TURN_DELAY); // 슬롯 애니메이션 종료 대기
+
+            // 3. 🚨🚨🚨 각 슬롯 결과를 순차적으로 처리하는 루프 🚨🚨🚨
+            for (let i = 0; i < results.length; i++) {
+
+                // 💡 [이펙트 시작] 현재 처리 중인 릴 인덱스 업데이트
+                setCurrentlyProcessingSlotIndex(i);
+
+                // 3-1. 단일 슬롯 결과 처리 (상태 변경)
+                const result = game.processSingleSlotResult(results[i], multiplier);
+                
+                // 3-2. React 상태 동기화 및 UI 업데이트
+                syncGameState(); 
+
+                // 3-3. 데미지 팝업 등의 시각 효과를 위한 상태 업데이트
+                if (result.physicalDamage > 0) {
+                    const newPopup = { id: Date.now() + i, damage: result.physicalDamage, type: 'monster' };
+                    setDamagePopups([newPopup]); // 🚨 배열 전체를 덮어쓰거나, 팝업 처리를 단일화해야 함
+                    
+                    // 💡 팝업을 표시할 시간을 따로 주고, 루프 딜레이 전에 팝업을 지워야 함
+                    await delay(300); // 팝업이 잠시 보일 시간
+                    setDamagePopups([]); // 팝업 초기화 (DamagePopup 컴포넌트 내부 로직과 상충될 수 있으니 주의)
+                }
+                
+                // 3-4. 몬스터 사망 체크 (중요: 순차 처리 중에도 죽을 수 있음)
+                if (result.isDead) {
+                    game.handleMonsterDefeat(); 
+                    syncGameState();
+                    await delay(ACTION_DELAY * 2); // 죽는 이펙트를 위해 잠시 대기
+                    break; // 루프 종료
+                }
+
+                await delay(ACTION_DELAY); // 릴 행동 사이 딜레이
+            }
+            
+            setCurrentlyProcessingSlotIndex(-1);
+
+            // 4. 몬스터 턴 시작
+            if (game.gameState === 'Combat') { // 몬스터가 살아있을 때만
+                await delay(MONSTER_TURN_DELAY); // 몬스터 턴 시작 전 대기
+                await game.monsterTurn(); // 몬스터 턴 진행 (이것도 내부적으로 비동기 처리 권장)
+                syncGameState(); 
+            }
+
+        } catch (error) {
+            console.error("Error during spin:", error);
+        } finally {
+            setIsSpinning(false);
+            // setSlotResults(null); // 다음 턴을 위해 초기화
         }
-        syncGameState();
-        return result.success;
-    };
+    }, [gameState, isSpinning, game, syncGameState]);
 
 
     return {
@@ -321,8 +363,9 @@ const startPlayerTurn = useCallback(async (slotCount) => {
         startPlayerTurn,
         handleMonsterTurn,
         handleBuyWeapon,
-        handleUpgradeWeapons,
         getShopItems,
         damagePopups,
+        handleSpin,
+        currentlyProcessingSlotIndex,
     };
 };
