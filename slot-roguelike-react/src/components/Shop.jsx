@@ -10,9 +10,12 @@ function Shop({
     onNextStage, 
     shopItems,
     handleBuyWeapon,
-    handleUpgradeWeapons
+    upgradeWeapons,
+    updatePlayerState
 }) {
     const isSlotMaxed = player.slotCount >= 5;
+    console.log(upgradeWeapons);
+
 
     return (
         <div id="shop-container" className="shop-container">
@@ -52,7 +55,7 @@ function Shop({
                 <button 
                     id="upgrade-weapons-btn" 
                     className="btn btn-upgrade"
-                    onClick={handleUpgradeWeapons}
+                    onClick={upgradeWeapons} // 이름 수정
                     disabled={player.gold < 150}
                 >
                     <div className="btn-icon">⚔️</div>

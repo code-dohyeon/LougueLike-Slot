@@ -28,6 +28,7 @@ function App() {
         goToNextStage,
         upgradeMaxHp,
         upgradeSlotCount,
+        upgradeWeaponsClick,
         damageTaken,
         getShopItems,
         handleBuyWeapon,
@@ -100,7 +101,7 @@ function App() {
                             onNextStage={goToNextStage}
                             shopItems={getShopItems()} 
                             handleBuyWeapon={handleBuyWeapon} 
-                            handleUpgradeWeapons={handleUpgradeWeapons}
+                            upgradeWeapons={upgradeWeaponsClick} // 이름 수정
                         />
                     )}
                     

@@ -278,7 +278,7 @@ class GameManager {
     // 💡 [새 함수] 무기 업그레이드 로직 (전체 공격/방어 아이템의 기본 성능을 영구 증가)
     upgradeWeapons() {
         const upgradeCost = 150; 
-        const upgradeValue = 2; // 기본 성능 2 증가
+        const upgradeValue = 2; // 기본 성능 2 증가 (예시)
 
         if (this.player.gold < upgradeCost) {
             return { success: false, message: `골드가 부족합니다! (업그레이드 비용: ${upgradeCost})` };
@@ -287,16 +287,23 @@ class GameManager {
         // 1. 골드 차감
         this.player.gold -= upgradeCost;
         
-        // 2. 공격/방어 아이템의 base_value를 영구적으로 증가
-        let itemsUpgraded = 0;
-        this.allEquipment.forEach(item => { // allEquipment는 data.js의 equipment를 참조함
-            if (item.type === 'Attack' || item.type === 'Defense') {
+        // 💡 [핵심 수정] 2. 모든 장비의 기본 성능을 영구적으로 증가시키는 로직
+        let upgradedCount = 0;
+        
+        // this.allEquipment는 data.js의 equipment 배열을 참조함 (장비 마스터 목록)
+        this.allEquipment.forEach(item => { 
+            // Attack, Defense, Resource 타입 아이템에만 적용
+            if (item.type === 'Attack' || item.type === 'Defense' || item.type === 'Resource') {
+                // 주의: 장비 마스터 데이터 자체의 base_value를 증가시켜야 함
                 item.base_value += upgradeValue;
-                itemsUpgraded++;
+                upgradedCount++;
+                // console.log(`[UPGRADE] ${item.name}의 기본값: +${upgradeValue}. 현재 ${item.base_value}`);
             }
         });
         
-        return { success: true, message: `모든 공격/방어 아이템의 기본 성능이 ${upgradeValue}만큼 증가했습니다! (총 ${itemsUpgraded}개 아이템)` };
+        // 3. (선택 사항) 다음 업그레이드 비용을 올리는 로직 등
+        
+        return { success: true, message: `모든 장비의 기본 성능이 ${upgradeValue}만큼 상승했습니다! (${upgradedCount}개)` };
     }
 }
 

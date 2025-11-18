@@ -33,9 +33,16 @@ export const useGame = () => {
     const syncGameState = () => {
         setGameState(game.gameState);
         setPlayerState({ ...game.player });
-        // 💡 수정: game.currentMonster가 null일 경우 안전하게 null로 초기화
-        setMonsterState(game.currentMonster ? { ...game.currentMonster } : null); 
+        setMonsterState(game.currentMonster ? { ...game.currentMonster } : null);
         setStage(game.stage);
+
+        // 상태 동기화 후 디버깅 로그 추가
+        console.log('🔄 Game State Synced:', {
+            gameState: game.gameState,
+            playerState: { ...game.player },
+            monsterState: game.currentMonster ? { ...game.currentMonster } : null,
+            stage: game.stage,
+        });
     };
 
     const handleMonsterTurn = useCallback(async () => {
@@ -279,6 +286,16 @@ const startPlayerTurn = useCallback(async () => {
     }, [gameState, isSpinning, game, syncGameState]);
 
 
+    // 💡 무기 업그레이드 함수 연결
+    const upgradeWeaponsClick = () => {
+        console.log('🔧 Calling upgradeWeapons...');
+        const result = game.upgradeWeapons(); // GameManager의 업그레이드 로직 호출
+        alert(result.message);
+        console.log('🔄 Upgrade result:', result);
+        syncGameState(); // 상태 동기화
+        return result;
+    };
+
     return {
         game, // (참고용) 필요하다면 GameManager 인스턴스 자체를 반환
         gameState,
@@ -302,6 +319,7 @@ const startPlayerTurn = useCallback(async () => {
         getShopItems,
         damagePopups,
         handleSpin,
+        upgradeWeaponsClick,
         currentlyProcessingSlotIndex,
     };
 };
