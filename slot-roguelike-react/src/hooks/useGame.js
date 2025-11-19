@@ -216,7 +216,7 @@ export const useGame = () => {
     };
 
     const getShopInventory = () => {
-        return shopInventory;
+        return game.shopInventory;
     };
 
     const handleBuyWeapon = (itemId) => {
