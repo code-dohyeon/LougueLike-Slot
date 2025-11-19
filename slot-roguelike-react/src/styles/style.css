@@ -925,7 +925,7 @@ body::before {
 /* ===== INVENTORY ===== */
 .hamburger-menu {
     position: fixed;
-    top: 8rem;
+    top: 1rem;
     right: 1rem;
     width: 40px;
     height: 36px;
@@ -1122,6 +1122,10 @@ body::before {
     
     .inventory-grid {
         grid-template-columns: 1fr;
+    }
+
+    .hamberger-menu {
+        top: 8rem
     }
 }
 
