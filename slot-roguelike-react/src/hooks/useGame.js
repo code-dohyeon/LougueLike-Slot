@@ -4,10 +4,10 @@ import React from 'react';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-const SPIN_DURATION = 800; // 스핀 애니메이션 시간
-const RESULT_SHOW_DELAY = 300; // 결과 표시 후 대기
-const ACTION_DELAY = 200; // 각 슬롯 처리 간 딜레이 (데미지 팝업용)
-const MONSTER_TURN_DELAY = 800; // 몬스터 턴 전 대기
+const SPIN_DURATION = 800;
+const RESULT_SHOW_DELAY = 300;
+const ACTION_DELAY = 200;
+const MONSTER_TURN_DELAY = 800;
 
 export const useGame = () => {
     const game = useMemo(() => new GameManager(), []);
@@ -22,6 +22,8 @@ export const useGame = () => {
     const [currentlyProcessingSlotIndex, setCurrentlyProcessingSlotIndex] = useState(-1);
     const [monsterDamagePopups, setMonsterDamagePopups] = useState([]);
     const [playerDamagePopups, setPlayerDamagePopups] = useState([]);
+    const [resourcePopups, setResourcePopups] = useState([]); // 골드/방어력 팝업
+    const [showInventory, setShowInventory] = useState(false);
 
     const syncGameState = () => {
         setGameState(game.gameState);
@@ -38,19 +40,15 @@ export const useGame = () => {
             setSlotResults(null);
             setCurrentlyProcessingSlotIndex(-1);
             
-            // 1. 스핀 결과 미리 계산
             const results = game.slotMachine.spin(game.player.slotCount);
             const multiplier = game.calculateMultiplier(results);
 
-            // 2. 스핀 애니메이션 시작 (결과는 아직 안 보여줌)
             await delay(SPIN_DURATION);
 
-            // 3. 스핀 멈추고 결과 표시
             setSlotResults(results);
             setIsSpinning(false);
             await delay(RESULT_SHOW_DELAY);
 
-            // 4. 각 슬롯 결과 처리 (데미지 팝업 동시 표시, 딜레이 최소화)
             for (let i = 0; i < results.length; i++) {
                 setCurrentlyProcessingSlotIndex(i);
                 
@@ -59,7 +57,6 @@ export const useGame = () => {
                 
                 syncGameState();
                 
-                // 공격 타입일 때만 데미지 팝업 표시
                 if(itemResult['type'] === 'Attack') {
                     const popups = [];
                     
@@ -88,45 +85,66 @@ export const useGame = () => {
                         popups.push({ id: Date.now() + Math.random() + 0.7, value: Math.floor(result.magicDamage), type: 'magic' });
                     }
                     
-                    // 모든 데미지 팝업 동시에 표시
                     if (popups.length > 0) {
                         setMonsterDamagePopups(popups);
                     }
+                } else if (itemResult['type'] === 'Defense') {
+                    // 방어력 획득 팝업
+                    setResourcePopups([{ 
+                        id: Date.now(), 
+                        value: Math.floor(result.defenseGain), 
+                        type: 'defense' 
+                    }]);
+                } else if (itemResult['type'] === 'Resource') {
+                    // 골드 획득 팝업
+                    setResourcePopups([{ 
+                        id: Date.now(), 
+                        value: Math.floor(result.goldGain), 
+                        type: 'gold' 
+                    }]);
                 }
 
-                // 몬스터 처치 확인
                 if (game.currentMonster && game.currentMonster.hp <= 0) {
                     game.handleMonsterDefeat();
                     syncGameState();
                     setCurrentlyProcessingSlotIndex(-1);
                     setMonsterDamagePopups([]);
+                    setResourcePopups([]);
                     return;
                 }
 
-                // 짧은 딜레이 (팝업이 보이도록)
                 await delay(ACTION_DELAY);
-                setMonsterDamagePopups([]); // 팝업 클리어
+                setMonsterDamagePopups([]);
+                setResourcePopups([]);
             }
             
             setCurrentlyProcessingSlotIndex(-1);
             
-            // 5. 몬스터 턴
             if (game.gameState === 'Combat') {
                 await delay(MONSTER_TURN_DELAY);
                 
-                const { damageTaken, status: monsterStatus, poisonDamage } = game.monsterAttack();
+                const { damageTaken, status: monsterStatus, poisonDamage, shieldAbsorbed } = game.monsterAttack();
                 syncGameState();
 
-                // 독 데미지 팝업
                 if (poisonDamage > 0) {
                     setMonsterDamagePopups([{ id: Date.now(), value: poisonDamage, type: 'poison' }]);
                     await delay(600);
                     setMonsterDamagePopups([]);
                 }
 
-                // 승리 체크
                 if (monsterStatus === 'win') {
                     return;
+                }
+                
+                // 쉴드 감소 팝업
+                if (shieldAbsorbed > 0) {
+                    setResourcePopups([{ 
+                        id: Date.now(), 
+                        value: Math.floor(shieldAbsorbed), 
+                        type: 'shield-lost' 
+                    }]);
+                    await delay(400);
+                    setResourcePopups([]);
                 }
                 
                 // 플레이어 피해 팝업
@@ -139,7 +157,6 @@ export const useGame = () => {
                 
                 syncGameState();
                 
-                // 패배 체크
                 if (monsterStatus === 'lose') {
                     setGameState('GameOver');
                     return;
@@ -197,7 +214,7 @@ export const useGame = () => {
     };
 
     const getShopItems = () => {
-        return game.allEquipment.filter(item => item.cost > 0);
+        return game.allEquipment;
     };
 
     const handleBuyWeapon = (itemId) => {
@@ -210,6 +227,22 @@ export const useGame = () => {
         }
         syncGameState();
         return result.success;
+    };
+
+    const handleSellWeapon = (itemId) => {
+        const result = game.sellWeapon(itemId);
+        
+        if (result.success) {
+            alert(result.message);
+        } else {
+            alert(`판매 실패: ${result.message}`);
+        }
+        syncGameState();
+        return result.success;
+    };
+
+    const toggleInventory = () => {
+        setShowInventory(!showInventory);
     };
 
     return {
@@ -228,8 +261,12 @@ export const useGame = () => {
         upgradeSlotCount,
         getShopItems,
         handleBuyWeapon,
+        handleSellWeapon,
         currentlyProcessingSlotIndex,
         monsterDamagePopups,
         playerDamagePopups,
+        resourcePopups,
+        showInventory,
+        toggleInventory,
     };
 };

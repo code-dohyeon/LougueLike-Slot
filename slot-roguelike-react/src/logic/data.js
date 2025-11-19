@@ -1,7 +1,7 @@
 export const equipment = [
-    { id: 'SWD_01', name: '나무 검', type: 'Attack', base_value: 10, damage_type: 'Physical', cost: 0, unlocked: true, requiredLevel: 0 }, 
-    { id: 'SHD_01', name: '나무 방패', type: 'Defense', base_value: 5, target: 'Player', cost: 0, unlocked: true, requiredLevel: 0 }, 
-    { id: 'RSC_01', name: '코인', type: 'Resource', base_value: 50, target: 'Player', cost: 0, unlocked: true, requiredLevel: 0 }, 
+    { id: 'SWD_01', name: '나무 검', type: 'Attack', base_value: 10, damage_type: 'Physical', cost: 0, unlocked: true, requiredLevel: 1 }, 
+    { id: 'SHD_01', name: '나무 방패', type: 'Defense', base_value: 5, target: 'Player', cost: 0, unlocked: true, requiredLevel: 1 }, 
+    { id: 'RSC_01', name: '코인', type: 'Resource', base_value: 50, target: 'Player', cost: 0, unlocked: true, requiredLevel: 1 }, 
     
     // 레벨 1 해금 무기 (스테이지 1-10 클리어 후)
     { id: 'DGR_01', name: '독 단검', type: 'Attack', base_value: 4, damage_type: 'Poison', cost: 150, unlocked: true, requiredLevel: 1 }, 

@@ -3,6 +3,7 @@ import Monster from './monster.js';
 import Item from './item.js';
 import SlotMachine from './slotMachine.js';
 import { monsters, equipmentMap, equipment, bosses } from './data.js';
+import PlayerStatus from '../components/PlayerStatus.jsx';
 
 class GameManager {
     constructor() {
@@ -42,9 +43,7 @@ class GameManager {
     
     gainExperience(expAmount) {
         this.playerExp += expAmount;
-        
-        // 레벨업 체크 (10 스테이지 = 1 레벨)
-        const newLevel = Math.floor(this.playerExp / 100); // 100 경험치당 1 레벨
+        const newLevel = Math.floor(this.playerExp / 100);
         
         if (newLevel > this.playerLevel) {
             this.playerLevel = newLevel;
@@ -73,7 +72,6 @@ class GameManager {
     }
 
     processSingleSlotResult(itemResult, multiplier) {
-        // Attack 타입이 아니면 데미지 없음
         if (itemResult.type !== 'Attack') {
             this.item.processSlotResult(
                 [itemResult],
@@ -89,7 +87,9 @@ class GameManager {
                 lightningDamage: 0,
                 holyDamage: 0,
                 darkDamage: 0,
-                magicDamage: 0
+                magicDamage: 0,
+                defenseGain: itemResult.type === 'Defense' ? itemResult.base_value * multiplier : 0,
+                goldGain: itemResult.type === 'Resource' ? itemResult.base_value * multiplier : 0
             };
         }
         
@@ -108,7 +108,9 @@ class GameManager {
             lightningDamage: actionResult.lightningDamage,
             holyDamage: actionResult.holyDamage,
             darkDamage: actionResult.darkDamage,
-            magicDamage: actionResult.magicDamage
+            magicDamage: actionResult.magicDamage,
+            defenseGain: 0,
+            goldGain: 0
         };
     }
 
@@ -142,6 +144,9 @@ class GameManager {
         this.player.gold += goldReward;
         this.gainExperience(expReward);
         
+        // 방어력 초기화
+        this.player.df = 0;
+        
         this.stage++;
         this.gameState = 'ShopPhase'; 
         this.currentMonster = null; 
@@ -151,16 +156,19 @@ class GameManager {
 
     monsterAttack() { 
         let totalPoisonDamage = 0;
+        let shieldAbsorbed = 0;
 
         if (this.currentMonster && this.currentMonster.processStatusEffects) {
             totalPoisonDamage = this.currentMonster.processStatusEffects();
 
             if(this.aliveChecked(this.currentMonster)) {
                 this.handleMonsterDefeat();
-                return { status: 'win', damageTaken: 0, poisonDamage: totalPoisonDamage }; 
+                return { status: 'win', damageTaken: 0, poisonDamage: totalPoisonDamage, shieldAbsorbed: 0 }; 
             }
         }
         
+        const absorbedDamage = Math.min(this.currentMonster.atk, this.player.df);
+        shieldAbsorbed = absorbedDamage;
         const actualDamage = this.player.takeDamage(this.currentMonster.atk);
 
         if (this.currentMonster.increaseAttack) { 
@@ -169,17 +177,19 @@ class GameManager {
         
         if(this.player.hp <= 0) {
             this.gameState = 'GameOver';
-            return { status: 'lose', damageTaken: actualDamage, poisonDamage: totalPoisonDamage };
+            return { status: 'lose', damageTaken: actualDamage, poisonDamage: totalPoisonDamage, shieldAbsorbed };
         }
 
-        return { status: 'continue', damageTaken: actualDamage, poisonDamage: totalPoisonDamage };
+        return { status: 'continue', damageTaken: actualDamage, poisonDamage: totalPoisonDamage, shieldAbsorbed };
     }
 
     prepareNextCombat() {
         const currentChapter = Math.ceil(this.stage / 10);
         const stageInChapter = ((this.stage - 1) % 10) + 1;
         
-        // 10번째 스테이지는 보스
+        // 방어력 초기화
+        this.player.df = 0;
+        
         if (stageInChapter === 10) {
             const boss = bosses.find(b => b.chapter === currentChapter);
             if (boss) {
@@ -191,14 +201,12 @@ class GameManager {
                 return;
             }
         } else {
-            // 일반 몬스터
             const chapterMonsters = monsters.filter(m => m.chapter === currentChapter);
             if (chapterMonsters.length > 0) {
                 const randomMonster = chapterMonsters[Math.floor(Math.random() * chapterMonsters.length)];
                 const scaledHp = randomMonster.hp + (this.stage - 1) * 10;
                 this.currentMonster = new Monster({...randomMonster, hp: scaledHp, maxHp: scaledHp});
             } else {
-                // 챕터에 몬스터가 없으면 마지막 챕터 몬스터 사용
                 const lastChapterMonsters = monsters.filter(m => m.chapter === 7);
                 const randomMonster = lastChapterMonsters[Math.floor(Math.random() * lastChapterMonsters.length)];
                 const scaledHp = randomMonster.hp + (this.stage - 1) * 10;
@@ -239,6 +247,34 @@ class GameManager {
         return { success: true, message: `${itemData.name}을(를) 구매하고 장착했습니다.` };
     }
 
+    sellWeapon(itemId) {
+        const itemData = this.allEquipment.find(item => item.id === itemId);
+        
+        if (!itemData) {
+            return { success: false, message: '아이템을 찾을 수 없습니다.' };
+        }
+        
+        if (!this.player.equippedWeapons.includes(itemId)) {
+            return { success: false, message: '장착하지 않은 무기입니다.' };
+        }
+        
+        if (this.player.equippedWeapons.length <= 1) {
+            return { success: false, message: '최소 1개의 무기는 장착해야 합니다!' };
+        }
+        
+        // 판매 가격은 구매 가격의 50%
+        const sellPrice = Math.floor(itemData.cost * 0.5);
+        this.player.gold += sellPrice;
+        this.player.equippedWeapons = this.player.equippedWeapons.filter(id => id !== itemId);
+        
+        // 업그레이드 레벨도 초기화
+        if (this.player.weaponUpgradeLevels[itemId]) {
+            delete this.player.weaponUpgradeLevels[itemId];
+        }
+        
+        return { success: true, message: `${itemData.name}을(를) ${sellPrice} 골드에 판매했습니다.` };
+    }
+
     upgradeWeapon(weaponId) {
         const weapon = this.allEquipment.find(w => w.id === weaponId);
         if (!weapon) {
@@ -246,7 +282,7 @@ class GameManager {
         }
         
         const currentLevel = this.player.weaponUpgradeLevels[weaponId] || 0;
-        const upgradeCost = 100 + currentLevel * 50; // 레벨이 높아질수록 비용 증가
+        const upgradeCost = weapon.cost + currentLevel * 50;
         
         if (this.player.gold < upgradeCost) {
             return { success: false, message: `골드가 부족합니다! (필요: ${upgradeCost})` };
@@ -254,16 +290,17 @@ class GameManager {
         
         this.player.gold -= upgradeCost;
         this.player.weaponUpgradeLevels[weaponId] = currentLevel + 1;
-        weapon.base_value += 5; // 레벨당 5씩 증가
+        weapon.base_value += 5;
+
+        console.log(this.player.gold);
         
         return { 
             success: true, 
             message: `${weapon.name}이(가) Lv.${currentLevel + 1}로 업그레이드되었습니다! (+5 성능 증가)` 
         };
-    }
-    
-    upgradeWeapons() {
-        return { success: false, message: '이 기능은 더 이상 사용되지 않습니다.' };
+
+        
+
     }
 }
 

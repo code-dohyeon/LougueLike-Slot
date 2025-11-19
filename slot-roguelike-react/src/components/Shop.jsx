@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 function Shop({ 
     player, 
@@ -8,6 +8,7 @@ function Shop({
     onNextStage, 
     shopItems,
     handleBuyWeapon,
+    handleSellWeapon,
     game
 }) {
     const isSlotMaxed = player.slotCount >= 5;
@@ -17,7 +18,12 @@ function Shop({
         alert(result.message);
     };
 
-    // 구매 가능한 무기: 해금되었고, 코스트가 있고, 아직 장착하지 않은 무기
+    const handleSell = (weaponId) => {
+        if (window.confirm('정말 이 무기를 판매하시겠습니까?')) {
+            handleSellWeapon(weaponId);
+        }
+    };
+
     const availableShopItems = shopItems.filter(item => 
         item.unlocked && 
         item.cost > 0 && 
@@ -100,7 +106,7 @@ function Shop({
                 )}
             </div>
             
-            <h3 className="shop-section-title">⚒️ 장착 무기 업그레이드</h3>
+            <h3 className="shop-section-title">⚒️ 장착 무기 관리</h3>
             <div className="shop-item-grid">
                 {player.equippedWeapons.length === 0 ? (
                     <div style={{ 
@@ -117,7 +123,8 @@ function Shop({
                         if (!weapon) return null;
                         
                         const currentLevel = player.weaponUpgradeLevels[weaponId] || 0;
-                        const upgradeCost = 100 + currentLevel * 50;
+                        const upgradeCost = weapon.cost + currentLevel * 50;
+                        const sellPrice = Math.floor(weapon.cost * 0.5);
                         
                         return (
                             <div key={weaponId} className="item-card">
@@ -133,15 +140,25 @@ function Shop({
                                     {weapon.base_value} {weapon.damage_type || weapon.type}
                                 </p>
                                 
-                                <p className="item-cost">{upgradeCost} 골드</p>
-                                
-                                <button 
-                                    className="buy-button"
-                                    onClick={() => handleUpgrade(weaponId)}
-                                    disabled={player.gold < upgradeCost}
-                                >
-                                    업그레이드 (+5)
-                                </button>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+                                    <button 
+                                        className="buy-button"
+                                        onClick={() => handleUpgrade(weaponId)}
+                                        disabled={player.gold < upgradeCost}
+                                        style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
+                                    >
+                                        업그레이드 (+5) - {upgradeCost}G
+                                    </button>
+                                    
+                                    <button 
+                                        className="buy-button"
+                                        onClick={() => handleSell(weaponId)}
+                                        disabled={player.equippedWeapons.length <= 1}
+                                        style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
+                                    >
+                                        판매 - {sellPrice}G
+                                    </button>
+                                </div>
                             </div>
                         );
                     })

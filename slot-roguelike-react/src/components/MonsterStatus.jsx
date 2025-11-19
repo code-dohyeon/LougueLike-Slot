@@ -1,13 +1,16 @@
 import React from 'react';
+import DamagePopups from './DamagePopups';
 
-function MonsterStatus({ monster }) {
+function MonsterStatus({ monster, damagePopups }) {
     if (!monster) return null;
 
     const hpPercentage = Math.max(0, (monster.hp / monster.maxHp) * 100);
     const displayHp = Math.max(0, Math.floor(monster.hp));
 
     return (
-        <div className="game-status">
+        <div className="game-status" style={{ position: 'relative' }}>
+            <DamagePopups popups={damagePopups} popupType="monster" />
+            
             <div className="monster-info">
                 <span>{monster.icon} {monster.type}</span>
                 {monster.isBoss && <span style={{ marginLeft: '10px', color: '#fbbf24' }}>👑 BOSS</span>}
