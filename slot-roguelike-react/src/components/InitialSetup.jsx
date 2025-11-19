@@ -23,7 +23,9 @@ function InitialSetup({ allEquipment, setWeapons }) {
         setWeapons(selectedWeapons);
     };
 
+    
     const availableWeapons = allEquipment.filter(item => item.cost === 0);
+    console.log(weapon.base_value);
 
     return (
         <div className="initial-setup-container">

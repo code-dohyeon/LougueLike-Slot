@@ -68,11 +68,8 @@ class GameManager {
             if (this.player.equippedWeapons.includes(item.id)) return false;
             
             // 현재 레벨 이하의 무기만 (해금 여부 무관)
-            if(currentLevel === 0) {
-                currentLevel = 1; return true;
-            }
 
-            if (item.requiredLevel <= currentLevel) return true;
+            if (item.requiredLevel <= currentLevel || currentLevel === 0) return true;
             
             return false;
         });
