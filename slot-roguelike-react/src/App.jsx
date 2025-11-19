@@ -103,32 +103,34 @@ function App() {
 
             {gameState === 'Combat' && (
                 <>
-                    <div style={{ position: 'relative' }}>
-                        <MonsterStatus 
-                            monster={monsterState} 
-                            damagePopups={monsterDamagePopups}
-                        />
-                    </div>
+                    <div className="combat-container">
+                        <div style={{ position: 'relative' }}>
+                            <MonsterStatus 
+                                monster={monsterState} 
+                                damagePopups={monsterDamagePopups}
+                            />
+                        </div>
 
-                    <div style={{ position: 'relative' }}>
-                        <PlayerStatus player={playerState} stage={stage} />
-                        <DamagePopups popups={playerDamagePopups} popupType="player" />
-                        <ResourcePopups popups={resourcePopups} />
-                    </div>
+                        <div style={{ position: 'relative' }}>
+                            <PlayerStatus player={playerState} stage={stage} />
+                            <DamagePopups popups={playerDamagePopups} popupType="player" />
+                            <ResourcePopups popups={resourcePopups} />
+                        </div>
+                    
+                        <div className="combat-phase">
+                            <SlotMachine 
+                                slotCount={playerState.slotCount}
+                                slotResults={slotResults}
+                                isSpinning={isSpinning}
+                                currentlyProcessingSlotIndex={currentlyProcessingSlotIndex}
+                            />
 
-                    <div className="combat-phase">
-                        <SlotMachine 
-                            slotCount={playerState.slotCount}
-                            slotResults={slotResults}
-                            isSpinning={isSpinning}
-                            currentlyProcessingSlotIndex={currentlyProcessingSlotIndex}
-                        />
-
-                        <SpinButton 
-                            onClick={startPlayerTurn}
-                            isSpinning={isSpinning}
-                            isBlocked={isBlocked}
-                        />
+                            <SpinButton 
+                                onClick={startPlayerTurn}
+                                isSpinning={isSpinning}
+                                isBlocked={isBlocked}
+                            />
+                        </div>
                     </div>
                 </>
             )}

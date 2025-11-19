@@ -103,16 +103,16 @@ function Shop({
                                 </p>
                                 
                                 <p className="item-cost">{item.cost} 골드</p>
-                                
-                                <button 
-                                    className="buy-button"
-                                    onClick={() => handleBuyWeapon(item.id)}
-                                    disabled={player.gold < item.cost}
-                                    data-testid={`button-buy-${item.id}`}
-                                >
-                                    구매 및 장착
-                                </button>
                             </div>
+                            <button 
+                                className="buy-button"
+                                onClick={() => handleBuyWeapon(item.id)}
+                                disabled={player.gold < item.cost}
+                                data-testid={`button-buy-${item.id}`}
+                            >
+                                구매 및 장착
+                            </button>
+                            
                         </div>
                     ))
                 )}
@@ -152,29 +152,30 @@ function Shop({
                                     <p className="item-stats">
                                         {weapon.base_value} {weapon.damage_type || weapon.type}
                                     </p>
-                                    
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
-                                        <button 
-                                            className="buy-button"
-                                            onClick={() => handleUpgradeWeapon(weaponId)}
-                                            disabled={player.gold < upgradeCost || weapon.cost === 0}
-                                            style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
-                                            data-testid={`button-upgrade-${weaponId}`}
-                                        >
-                                            업그레이드 - {upgradeCost}G
-                                        </button>
-                                        
-                                        <button 
-                                            className="buy-button"
-                                            onClick={() => handleSell(weaponId)}
-                                            disabled={player.equippedWeapons.length <= 3}
-                                            style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
-                                            data-testid={`button-sell-${weaponId}`}
-                                        >
-                                            판매 - {sellPrice}G
-                                        </button>
-                                    </div>
                                 </div>
+                                    
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+                                <button 
+                                    className="buy-button"
+                                    onClick={() => handleUpgradeWeapon(weaponId)}
+                                    disabled={player.gold < upgradeCost || weapon.cost === 0}
+                                    style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
+                                    data-testid={`button-upgrade-${weaponId}`}
+                                >
+                                    업그레이드 - {upgradeCost}G
+                                </button>
+                                
+                                <button 
+                                    className="buy-button"
+                                    onClick={() => handleSell(weaponId)}
+                                    disabled={player.equippedWeapons.length <= 3}
+                                    style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
+                                    data-testid={`button-sell-${weaponId}`}
+                                >
+                                    판매 - {sellPrice}G
+                                </button>
+                            </div>
+                                
                             </div>
                         );
                     })
