@@ -65,6 +65,28 @@ function App() {
         }
     }, [gameState, isGameOver]);
 
+    // 💥💥 뷰포트 높이 설정 로직 (App 컴포넌트 함수 내부) 💥💥
+    useEffect(() => {
+        // 뷰포트 높이를 계산하고 CSS 변수로 설정하는 함수
+        const setAppHeight = () => {
+            // 뷰포트의 실제 높이(px)를 계산한다. (모바일 UI 제외)
+            const vh = window.innerHeight * 0.01;
+            // 계산된 값을 CSS 변수 --app-height로 설정한다.
+            document.documentElement.style.setProperty('--app-height', `${vh * 100}px`);
+        };
+
+        // 💥 컴포넌트 마운트 시 최초 설정
+        setAppHeight();
+        
+        // 💥 뷰포트 크기 변경(폰 방향 전환 등) 시 재계산
+        window.addEventListener('resize', setAppHeight);
+        
+        // 💥 컴포넌트 언마운트 시 이벤트 리스너 제거 (클린업)
+        return () => {
+            window.removeEventListener('resize', setAppHeight);
+        };
+    }, []); // 빈 배열: 앱이 마운트될 때 딱 한 번만 실행!
+
     const handleGameStart = () => {
         setShowStartScreen(false);
     };
