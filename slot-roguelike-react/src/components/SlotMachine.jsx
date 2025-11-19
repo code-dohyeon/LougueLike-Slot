@@ -1,4 +1,3 @@
-import React from 'react';
 import SlotReel from './SlotReel';
 
 function SlotMachine({ slotCount, slotResults, isSpinning, currentlyProcessingSlotIndex }) {
@@ -13,7 +12,6 @@ function SlotMachine({ slotCount, slotResults, isSpinning, currentlyProcessingSl
 
     const reels = [];
     for (let i = 0; i < slotCount; i++) {
-        // 스피닝 중일 때는 물음표, 멈췄을 때만 결과 표시
         const icon = (!isSpinning && slotResults) ? getIconForType(slotResults[i].type) : '❓';
         const isProcessing = currentlyProcessingSlotIndex === i;
         
@@ -28,7 +26,7 @@ function SlotMachine({ slotCount, slotResults, isSpinning, currentlyProcessingSl
     }
 
     return (
-        <div className="slot-container">
+        <div className="slot-container combat-element">
             {reels}
         </div>
     );

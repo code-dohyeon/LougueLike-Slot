@@ -1,32 +1,30 @@
-import React from 'react';
-
 function Inventory({ player, shopItems, isOpen, onClose }) {
     if (!isOpen) return null;
 
     return (
-        <div className="inventory-overlay" onClick={onClose}>
+        <div className="inventory-overlay" onClick={onClose} data-testid="inventory-overlay">
             <div className="inventory-container" onClick={(e) => e.stopPropagation()}>
                 <div className="inventory-header">
                     <h2 className="inventory-title">📦 인벤토리</h2>
-                    <button className="inventory-close" onClick={onClose}>✕</button>
+                    <button className="inventory-close" onClick={onClose} data-testid="button-close-inventory">✕</button>
                 </div>
                 
                 <div className="inventory-stats">
                     <div className="inv-stat">
                         <span className="inv-stat-label">HP:</span>
-                        <span className="inv-stat-value">{Math.floor(player.hp)} / {player.maxHP}</span>
+                        <span className="inv-stat-value" data-testid="inv-hp">{Math.floor(player.hp)} / {player.maxHP}</span>
                     </div>
                     <div className="inv-stat">
                         <span className="inv-stat-label">DF:</span>
-                        <span className="inv-stat-value">{Math.floor(player.df)}</span>
+                        <span className="inv-stat-value" data-testid="inv-defense">{Math.floor(player.df)}</span>
                     </div>
                     <div className="inv-stat">
                         <span className="inv-stat-label">Gold:</span>
-                        <span className="inv-stat-value">{Math.floor(player.gold)}</span>
+                        <span className="inv-stat-value" data-testid="inv-gold">{Math.floor(player.gold)}</span>
                     </div>
                     <div className="inv-stat">
                         <span className="inv-stat-label">슬롯:</span>
-                        <span className="inv-stat-value">{player.slotCount}</span>
+                        <span className="inv-stat-value" data-testid="inv-slots">{player.slotCount}</span>
                     </div>
                 </div>
 
@@ -42,7 +40,7 @@ function Inventory({ player, shopItems, isOpen, onClose }) {
                             const level = player.weaponUpgradeLevels[weaponId] || 0;
                             
                             return (
-                                <div key={weaponId} className="inventory-item">
+                                <div key={weaponId} className="inventory-item" data-testid={`inv-weapon-${weaponId}`}>
                                     <div className="inv-item-icon">
                                         {weapon.type === 'Attack' && '⚔️'}
                                         {weapon.type === 'Defense' && '🛡️'}

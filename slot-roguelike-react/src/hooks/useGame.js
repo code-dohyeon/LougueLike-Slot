@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
 import GameManager from '../logic/gameManager'; 
-import React from 'react';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -8,6 +7,7 @@ const SPIN_DURATION = 800;
 const RESULT_SHOW_DELAY = 300;
 const ACTION_DELAY = 200;
 const MONSTER_TURN_DELAY = 800;
+const DEATH_DELAY = 800;
 
 export const useGame = () => {
     const game = useMemo(() => new GameManager(), []);
@@ -18,7 +18,8 @@ export const useGame = () => {
     const [stage, setStage] = useState(game.stage);
     const [slotResults, setSlotResults] = useState(null);
     const [isSpinning, setIsSpinning] = useState(false);
-    const [shopInventory, setShopInventory] = useState([]); // 상점 인벤토리
+    const [shopInventory, setShopInventory] = useState([]);
+    const [isBlocked, setIsBlocked] = useState(false);
     
     const [currentlyProcessingSlotIndex, setCurrentlyProcessingSlotIndex] = useState(-1);
     const [monsterDamagePopups, setMonsterDamagePopups] = useState([]);
@@ -31,12 +32,14 @@ export const useGame = () => {
         setPlayerState({ ...game.player });
         setMonsterState(game.currentMonster ? { ...game.currentMonster } : null);
         setStage(game.stage);
-        setShopInventory([...game.shopInventory]); // 상점 인벤토리 동기화
+        setShopInventory([...game.shopInventory]);
     };
 
     const startPlayerTurn = useCallback(async () => {
-        if (isSpinning || gameState !== 'Combat') return;
+        if (isSpinning || isBlocked || gameState !== 'Combat') return;
+        
         setIsSpinning(true);
+        setIsBlocked(true);
 
         try {
             setSlotResults(null);
@@ -105,11 +108,13 @@ export const useGame = () => {
                 }
 
                 if (game.currentMonster && game.currentMonster.hp <= 0) {
+                    await delay(DEATH_DELAY);
                     game.handleMonsterDefeat();
                     syncGameState();
                     setCurrentlyProcessingSlotIndex(-1);
                     setMonsterDamagePopups([]);
                     setResourcePopups([]);
+                    setIsBlocked(false);
                     return;
                 }
 
@@ -130,9 +135,18 @@ export const useGame = () => {
                     setMonsterDamagePopups([{ id: Date.now(), value: poisonDamage, type: 'poison' }]);
                     await delay(600);
                     setMonsterDamagePopups([]);
+                    
+                    if (game.currentMonster && game.currentMonster.hp <= 0) {
+                        await delay(DEATH_DELAY);
+                        game.handleMonsterDefeat();
+                        syncGameState();
+                        setIsBlocked(false);
+                        return;
+                    }
                 }
 
                 if (monsterStatus === 'win') {
+                    setIsBlocked(false);
                     return;
                 }
                 
@@ -156,7 +170,9 @@ export const useGame = () => {
                 syncGameState();
                 
                 if (monsterStatus === 'lose') {
+                    await delay(DEATH_DELAY);
                     setGameState('GameOver');
+                    setIsBlocked(false);
                     return;
                 }
             }
@@ -165,8 +181,9 @@ export const useGame = () => {
             console.error("Error during spin:", error);
         } finally {
             setIsSpinning(false);
+            setIsBlocked(false);
         }
-    }, [gameState, isSpinning, game]);
+    }, [gameState, isSpinning, isBlocked, game]);
 
     const goToNextStage = () => {
         game.gameState = 'Combat';
@@ -198,8 +215,8 @@ export const useGame = () => {
     };
 
     const upgradeSlotCount = () => {
-        if (game.player.slotCount < 5 && game.player.gold >= 100) {
-            game.player.gold -= 100;
+        if (game.player.slotCount < 5 && game.player.gold >= 5000) {
+            game.player.gold -= 5000;
             game.player.slotCount++;
 
             alert(`슬롯 개수가 ${game.player.slotCount}개로 증가했습니다!`);
@@ -224,10 +241,10 @@ export const useGame = () => {
         
         if (result.success) {
             alert(result.message);
+            syncGameState();
         } else {
             alert(`구매 실패: ${result.message}`);
         }
-        syncGameState();
         return result.success;
     };
 
@@ -236,10 +253,10 @@ export const useGame = () => {
         
         if (result.success) {
             alert(result.message);
+            syncGameState();
         } else {
             alert(`판매 실패: ${result.message}`);
         }
-        syncGameState();
         return result.success;
     };
 
@@ -248,10 +265,22 @@ export const useGame = () => {
         
         if (result.success) {
             alert(result.message);
+            syncGameState();
         } else {
             alert(result.message);
         }
-        syncGameState();
+    };
+
+    const handleUpgradeWeapon = (weaponId) => {
+        const result = game.upgradeWeapon(weaponId);
+        
+        if (result.success) {
+            alert(result.message);
+            syncGameState();
+        } else {
+            alert(result.message);
+        }
+        return result.success;
     };
 
     const toggleInventory = () => {
@@ -266,6 +295,7 @@ export const useGame = () => {
         stage,
         slotResults,
         isSpinning,
+        isBlocked,
         startPlayerTurn,
         goToNextStage,
         restartGame,
@@ -277,6 +307,7 @@ export const useGame = () => {
         handleBuyWeapon,
         handleSellWeapon,
         handleRefreshShop,
+        handleUpgradeWeapon,
         currentlyProcessingSlotIndex,
         monsterDamagePopups,
         playerDamagePopups,

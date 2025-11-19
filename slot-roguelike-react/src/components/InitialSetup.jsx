@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 function InitialSetup({ allEquipment, setWeapons }) {
     const [selectedWeapons, setSelectedWeapons] = useState([]);
@@ -23,7 +23,6 @@ function InitialSetup({ allEquipment, setWeapons }) {
         setWeapons(selectedWeapons);
     };
 
-    
     const availableWeapons = allEquipment.filter(item => item.cost === 0);
 
     return (
@@ -37,6 +36,7 @@ function InitialSetup({ allEquipment, setWeapons }) {
                         key={weapon.id}
                         className={`weapon-card ${selectedWeapons.includes(weapon.id) ? 'selected' : ''}`}
                         onClick={() => handleWeaponClick(weapon.id)}
+                        data-testid={`weapon-card-${weapon.id}`}
                     >
                         {selectedWeapons.includes(weapon.id) && (
                             <div className="selection-badge">
@@ -65,6 +65,7 @@ function InitialSetup({ allEquipment, setWeapons }) {
                 className="btn btn-start-combat"
                 onClick={handleStart}
                 disabled={selectedWeapons.length !== 3}
+                data-testid="button-start-combat"
             >
                 전투 시작! ({selectedWeapons.length}/3)
             </button>

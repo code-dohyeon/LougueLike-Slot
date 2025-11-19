@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGame } from './hooks/useGame';
 import GameStart from './components/GameStart';
 import InitialSetup from './components/InitialSetup';
@@ -10,7 +10,7 @@ import Shop from './components/Shop';
 import DamagePopups from './components/DamagePopups';
 import ResourcePopups from './components/ResourcePopups';
 import Inventory from './components/Inventory';
-import '../src/styles/style.css';
+import './styles/style.css';
 
 function App() {
     const {
@@ -21,6 +21,7 @@ function App() {
         stage,
         slotResults,
         isSpinning,
+        isBlocked,
         startPlayerTurn,
         goToNextStage,
         restartGame,
@@ -30,33 +31,31 @@ function App() {
         getShopItems,
         handleBuyWeapon,
         handleSellWeapon,
+        handleUpgradeWeapon,
         currentlyProcessingSlotIndex,
         monsterDamagePopups,
         playerDamagePopups,
         resourcePopups,
         showInventory,
         toggleInventory,
-        handleUpgradeWeapon,
         getShopInventory,
         handleRefreshShop
     } = useGame();
 
-    const [showStartScreen, setShowStartScreen] = React.useState(true);
-    const [isGameOver, setIsGameOver] = React.useState(false);
+    const [showStartScreen, setShowStartScreen] = useState(true);
+    const [isGameOver, setIsGameOver] = useState(false);
 
     useEffect(() => {
         if (gameState === 'GameOver' && !isGameOver) {
             setIsGameOver(true);
             
-            // 상태바 떨어지는 애니메이션
-            const statusElements = document.querySelectorAll('.game-status, .player-status, .game-info');
+            const statusElements = document.querySelectorAll('.game-status, .player-status, .game-info, .combat-element');
             statusElements.forEach((el, idx) => {
                 setTimeout(() => {
                     el.classList.add('status-fall-animation');
                 }, idx * 100);
             });
             
-            // 게임 오버 화면 떨어지는 애니메이션
             setTimeout(() => {
                 const gameOverContainer = document.querySelector('.game-over-container');
                 if (gameOverContainer) {
@@ -76,11 +75,11 @@ function App() {
 
     return (
         <div className="game-wrapper">
-            {/* 햄버거 메뉴 (전투 중에만 표시) */}
             {gameState === 'Combat' && (
                 <div 
                     className={`hamburger-menu ${showInventory ? 'open' : ''}`}
                     onClick={toggleInventory}
+                    data-testid="button-hamburger-menu"
                 >
                     <div className="hamburger-line"></div>
                     <div className="hamburger-line"></div>
@@ -88,7 +87,6 @@ function App() {
                 </div>
             )}
 
-            {/* 인벤토리 */}
             <Inventory 
                 player={playerState}
                 shopItems={getShopItems()}
@@ -129,6 +127,7 @@ function App() {
                         <SpinButton 
                             onClick={startPlayerTurn}
                             isSpinning={isSpinning}
+                            isBlocked={isBlocked}
                         />
                     </div>
                 </>
@@ -160,6 +159,7 @@ function App() {
                     <button 
                         className="btn btn-restart"
                         onClick={restartGame}
+                        data-testid="button-restart"
                     >
                         🔄 다시 도전하기
                     </button>

@@ -1,28 +1,30 @@
-import React from 'react';
-
 function PlayerStatus({ player, stage }) {
-    const hpPercentage = (player.hp / player.maxHP) * 100;
-
     return (
-        <div className="player-status">
+        <div className="player-status combat-element">
             <div className="stat-item">
                 <span className="stat-label">HP</span>
-                <span className="stat-value" id="player-hp-value">{Math.max(0, Math.floor(player.hp))} / {player.maxHP}</span>
+                <span className="stat-value" id="player-hp-value" data-testid="player-hp">
+                    {Math.max(0, Math.floor(player.hp))} / {player.maxHP}
+                </span>
             </div>
             
             <div className="stat-item">
                 <span className="stat-label">DF</span>
-                <span className="stat-value" id="player-df">{Math.floor(player.df)}</span>
+                <span className="stat-value" id="player-df" data-testid="player-defense">
+                    {Math.floor(player.df)}
+                </span>
             </div>
             
             <div className="stat-item">
                 <span className="stat-label">GOLD</span>
-                <span className="stat-value" id="player-gold">{Math.floor(player.gold)}</span>
+                <span className="stat-value" id="player-gold" data-testid="player-gold">
+                    {Math.floor(player.gold)}
+                </span>
             </div>
             
             <div className="stat-item">
                 <span className="stat-label">STAGE</span>
-                <span className="stat-value">{stage}</span>
+                <span className="stat-value" data-testid="player-stage">{stage}</span>
             </div>
         </div>
     );

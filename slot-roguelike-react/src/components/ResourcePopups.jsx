@@ -1,5 +1,3 @@
-import React from 'react';
-
 function ResourcePopups({ popups = [] }) {
     const typeInfo = {
         gold: { color: '#fbbf24', icon: '💰', prefix: '+' },
@@ -35,6 +33,7 @@ function ResourcePopups({ popups = [] }) {
                             animation: 'resourceFloat 1.2s ease-out forwards',
                             opacity: 0
                         }}
+                        data-testid={`resource-popup-${popup.type}`}
                     >
                         {info.icon} {info.prefix}{popup.value}
                     </div>

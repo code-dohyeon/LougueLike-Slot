@@ -1,5 +1,3 @@
-import React from 'react';
-
 function Shop({ 
     player, 
     stage, 
@@ -7,18 +5,14 @@ function Shop({
     onUpgradeSlot, 
     onNextStage, 
     shopItems,
-    shopInventory = [], // 랜덤 상점 인벤토리 (기본값 빈 배열)
+    shopInventory = [],
     handleBuyWeapon,
     handleSellWeapon,
-    handleRefreshShop, // 상점 새로고침
+    handleUpgradeWeapon,
+    handleRefreshShop, 
     game
 }) {
     const isSlotMaxed = player.slotCount >= 5;
-
-    const handleUpgrade = (weaponId) => {
-        const result = game.upgradeWeapon(weaponId);
-        alert(result.message);
-    };
 
     const handleSell = (weaponId) => {
         if (window.confirm('정말 이 무기를 판매하시겠습니까?')) {
@@ -27,11 +21,11 @@ function Shop({
     };
 
     return (
-        <div id="shop-container" className="shop-container">
+        <div id="shop-container" className="shop-container" data-testid="shop-container">
             <h2 className="shop-title">✨ STAGE {stage - 1} CLEAR! ✨</h2>
             
             <p className="shop-gold">
-                현재 골드: <span id="shop-gold-value" className="gold-highlight">{Math.floor(player.gold)}</span>
+                현재 골드: <span id="shop-gold-value" className="gold-highlight" data-testid="shop-gold">{Math.floor(player.gold)}</span>
             </p>
 
             <div className="shop-upgrade-grid">
@@ -40,6 +34,7 @@ function Shop({
                     className="btn btn-upgrade"
                     onClick={onUpgradeHp}
                     disabled={player.gold < 50}
+                    data-testid="button-upgrade-hp"
                 >
                     <div className="btn-icon">❤️</div>
                     <div className="btn-text">
@@ -53,6 +48,7 @@ function Shop({
                     className="btn btn-upgrade"
                     onClick={onUpgradeSlot}
                     disabled={isSlotMaxed || player.gold < 5000}
+                    data-testid="button-upgrade-slot"
                 >
                     <div className="btn-icon">🎰</div>
                     <div className="btn-text">
@@ -62,25 +58,25 @@ function Shop({
                 </button>
             </div>
 
-            
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem' }}>
-                <h3 className="shop-section-title" style={{ margin: 0 }}>🛡️ 무기 상점</h3>
-                <button 
-                    className="btn btn-upgrade"
-                    onClick={handleRefreshShop}
-                    disabled={player.gold < 50}
-                    style={{ 
-                        padding: '0.5rem 1rem',
-                        fontSize: '0.875rem',
-                        background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
-                    }}
-                >
-                    🔄 새로고침 (50G)
-                </button>
-            </div>
-            
-            <div className="shop-item-grid">
+            <div className="shop-scrollable-content">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 className="shop-section-title" style={{ margin: 0 }}>🛡️ 무기 상점</h3>
+                    <button 
+                        className="btn btn-upgrade"
+                        onClick={handleRefreshShop}
+                        disabled={player.gold < 50}
+                        style={{ 
+                            padding: '0.5rem 1rem',
+                            fontSize: '0.875rem',
+                            background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
+                        }}
+                        data-testid="button-refresh-shop"
+                    >
+                        🔄 새로고침 (50G)
+                    </button>
+                </div>
+                
+                <div className="shop-item-grid">
                 {shopInventory.length === 0 ? (
                     <div style={{ 
                         color: '#c4b5fd', 
@@ -92,7 +88,7 @@ function Shop({
                     </div>
                 ) : (
                     shopInventory.map(item => (
-                        <div key={item.id} className="item-card">
+                        <div key={item.id} className="item-card" data-testid={`shop-item-${item.id}`}>
                             <div className="item-icon">
                                 {item.type === 'Attack' && '⚔️'}
                                 {item.type === 'Defense' && '🛡️'}
@@ -111,6 +107,7 @@ function Shop({
                                 className="buy-button"
                                 onClick={() => handleBuyWeapon(item.id)}
                                 disabled={player.gold < item.cost}
+                                data-testid={`button-buy-${item.id}`}
                             >
                                 구매 및 장착
                             </button>
@@ -136,11 +133,11 @@ function Shop({
                         if (!weapon) return null;
                         
                         const currentLevel = player.weaponUpgradeLevels[weaponId] || 0;
-                        const upgradeCost = 100 + currentLevel * 50;
+                        const upgradeCost = 100 + (currentLevel * 75);
                         const sellPrice = Math.floor(weapon.cost * 0.5);
                         
                         return (
-                            <div key={weaponId} className="item-card">
+                            <div key={weaponId} className="item-card" data-testid={`equipped-weapon-${weaponId}`}>
                                 <div className="item-icon">
                                     {weapon.type === 'Attack' && '⚔️'}
                                     {weapon.type === 'Defense' && '🛡️'}
@@ -156,18 +153,20 @@ function Shop({
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
                                     <button 
                                         className="buy-button"
-                                        onClick={() => handleUpgrade(weaponId)}
+                                        onClick={() => handleUpgradeWeapon(weaponId)}
                                         disabled={player.gold < upgradeCost || weapon.cost === 0}
                                         style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
+                                        data-testid={`button-upgrade-${weaponId}`}
                                     >
-                                        업그레이드 (+5) - {upgradeCost}G
+                                        업그레이드 - {upgradeCost}G
                                     </button>
                                     
                                     <button 
                                         className="buy-button"
                                         onClick={() => handleSell(weaponId)}
-                                        disabled={player.equippedWeapons.length <= 1}
+                                        disabled={player.equippedWeapons.length <= 3}
                                         style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
+                                        data-testid={`button-sell-${weaponId}`}
                                     >
                                         판매 - {sellPrice}G
                                     </button>
@@ -177,11 +176,13 @@ function Shop({
                     })
                 )}
             </div>
+            </div>
             
             <button 
                 id="next-stage-btn" 
                 className="btn btn-next-stage"
                 onClick={onNextStage}
+                data-testid="button-next-stage"
             >
                 다음 스테이지로 이동 ({stage})
             </button>
