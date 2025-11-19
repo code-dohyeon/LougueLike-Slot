@@ -25,8 +25,10 @@ function Shop({
             <div id="shop-container" className="shop-container" data-testid="shop-container">
                 <h2 className="shop-title">✨ STAGE {stage - 1} CLEAR! ✨</h2>
                 
-                <p className="shop-gold">
+                <p className="shop-info">
                     현재 골드: <span id="shop-gold-value" className="gold-highlight" data-testid="shop-gold">{Math.floor(player.gold)}</span>
+                    <br />
+                    현재 체력: <span id="shop-hp-value" className="red-highlight" data-testid="shop-hp">{player.hp}</span>
                 </p>
 
                 <div className="shop-upgrade-grid">
