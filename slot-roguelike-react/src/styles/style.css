@@ -636,7 +636,7 @@ body::before {
 
 @media (max-width: 768px) {
     .shop-padding {
-        padding: 20% 1.5rem 20% 1.5rem;
+        padding: 0 1.5rem 0 1.5rem;
     }
 }
 
@@ -1270,6 +1270,12 @@ body::before {
     animation: gameOverPulse 2s ease-in-out infinite;
 }
 
+.game-over-text > p {
+    color: '#fca5a5';
+    font-size: '1.25rem';
+    margin-bottom: 2rem;
+}
+
 @keyframes gameOverPulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
@@ -1361,4 +1367,31 @@ body::before {
 .shop-container::-webkit-scrollbar-thumb:hover,
 .inventory-container::-webkit-scrollbar-thumb:hover {
     background: rgba(139, 92, 246, 0.7);
+}
+
+@media (max-width: 768px) {
+    .game-over-text {
+        font-size: 2rem;
+    }
+    
+    .btn-restart {
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .game-over-text {
+        font-size: 1.5rem;
+    }
+
+    .game-over-container > p {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .btn-restart {
+        padding: 0.8rem 2rem;
+        font-size: 1rem;
+    }
 }

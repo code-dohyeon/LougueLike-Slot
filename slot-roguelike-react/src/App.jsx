@@ -177,7 +177,7 @@ function App() {
             {gameState === 'GameOver' && (
                 <div className="game-over-container" style={{ opacity: 0 }}>
                     <div className="game-over-text">💀 GAME OVER 💀</div>
-                    <p style={{ color: '#fca5a5', fontSize: '1.25rem', marginBottom: '2rem' }}>
+                    <p>
                         Stage {stage}에서 전사했습니다...
                     </p>
                     <button 
