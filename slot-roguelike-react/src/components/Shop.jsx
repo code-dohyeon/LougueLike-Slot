@@ -66,12 +66,8 @@ function Shop({
                             className="btn btn-upgrade"
                             onClick={handleRefreshShop}
                             disabled={player.gold < 50}
-                            style={{ 
-                                padding: '0.5rem 1rem',
-                                fontSize: '0.875rem',
-                                background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
-                            }}
                             data-testid="button-refresh-shop"
+                            id="refresh-button"
                         >
                             🔄 새로고침 (50G)
                         </button>
