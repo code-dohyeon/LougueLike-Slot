@@ -157,7 +157,7 @@ function Shop({
                                     <button 
                                         className="buy-button"
                                         onClick={() => handleUpgrade(weaponId)}
-                                        disabled={player.gold < upgradeCost || weapon.cost !== 0}
+                                        disabled={player.gold < upgradeCost || weapon.cost === 0}
                                         style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
                                     >
                                         업그레이드 (+5) - {upgradeCost}G
