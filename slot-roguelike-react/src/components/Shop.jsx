@@ -57,7 +57,7 @@ function Shop({
                     <div className="btn-icon">🎰</div>
                     <div className="btn-text">
                         <div>슬롯 개수 +1</div>
-                        <div className="btn-cost">{isSlotMaxed ? '(최대치)' : '100 Gold'}</div>
+                        <div className="btn-cost">{isSlotMaxed ? '(최대치)' : '5000 Gold'}</div>
                     </div>
                 </button>
             </div>
