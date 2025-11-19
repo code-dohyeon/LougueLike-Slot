@@ -6,7 +6,7 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const SPIN_DURATION = 800;
 const RESULT_SHOW_DELAY = 300;
 const ACTION_DELAY = 200;
-const MONSTER_TURN_DELAY = 800;
+const MONSTER_TURN_DELAY = 400;
 const DEATH_DELAY = 800;
 
 export const useGame = () => {

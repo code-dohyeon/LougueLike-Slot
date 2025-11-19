@@ -334,11 +334,20 @@ body::before {
     .weapon-card {
         min-width: 120px;
         max-width: 140px;
-        padding: 1rem 0.75rem;
+        padding: .6rem 0.6rem;
     }
     
     .weapon-icon-large {
-        font-size: 2.5rem;
+        font-size: 2rem;
+    }
+
+    .weapon-name {
+        font-size: 0.95rem;
+    }
+
+    .btn-start-combat {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
     }
 }
 
@@ -352,7 +361,7 @@ body::before {
     min-height: 50vh;
     width: 100%;
     margin: 0 auto;
-    padding: 5rem 0 0 0;
+    padding: 20% 0 0 0;
 }
 
 .game-status {
@@ -418,7 +427,7 @@ body::before {
     }
 
     .combat-container {
-        padding: 5rem 1.5rem 0 1.5rem;
+        padding: 0 1.5rem 0 1.5rem;
     }
 }
 
