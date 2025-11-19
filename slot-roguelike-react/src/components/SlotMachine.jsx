@@ -1,38 +1,32 @@
-// src/components/SlotMachine.jsx
-
 import React from 'react';
 import SlotReel from './SlotReel';
 
-// 슬롯 이모지 맵 (바닐라 JS에서 가져온 매핑)
-const itemEmogiMap = {
-    'Attack': '⚔️',
-    'Defense': '🛡️',
-    'Resource': '💰'
-};
-
 function SlotMachine({ slotCount, slotResults, isSpinning, currentlyProcessingSlotIndex }) {
-    // 💡 Array.from을 사용하여 slotCount만큼 릴 배열을 생성하고 순회
-    const reels = Array.from({ length: slotCount }, (_, index) => {
-        // 결과 배열에서 해당 릴의 결과 아이템을 가져옴
-        const itemResult = slotResults ? slotResults[index] : null; 
-        
-        // 💡 현재 릴이 처리 중인지 확인하는 변수
-        const isProcessing = index === currentlyProcessingSlotIndex; 
+    const getIconForType = (type) => {
+        switch(type) {
+            case 'Attack': return '⚔️';
+            case 'Defense': return '🛡️';
+            case 'Resource': return '💰';
+            default: return '❓';
+        }
+    };
 
-        return (
-            <SlotReel
-                key={index}
-                item={itemResult}
+    const reels = [];
+    for (let i = 0; i < slotCount; i++) {
+        const icon = slotResults ? getIconForType(slotResults[i].type) : '❓';
+        const isProcessing = currentlyProcessingSlotIndex === i;
+        reels.push(
+            <SlotReel 
+                key={i} 
+                icon={icon} 
                 isSpinning={isSpinning}
-                isProcessing={isProcessing} // 💡 SlotReel에 prop 전달
-                emojiMap={itemEmogiMap}
+                isProcessing={isProcessing}
             />
         );
-    });
+    }
 
-    // CSS Grid/Flexbox 설정을 위해 slot-container 클래스 사용
     return (
-        <div id="slot-container" className="slot-container">
+        <div className="slot-container">
             {reels}
         </div>
     );

@@ -8,11 +8,12 @@ import SlotMachine from './components/SlotMachine';
 import SpinButton from './components/SpinButton';
 import Shop from './components/Shop';
 import InitialSetup from './components/InitialSetup';
-import DamagePopup from './components/DamagePopup';
+import DamagePopups from './components/DamagePopups';
 import GameStart from './components/GameStart';
 
 function App() {
     const [showStartScreen, setShowStartScreen] = React.useState(true);
+    const [gameOverAnimation, setGameOverAnimation] = React.useState(false);
     
     const { 
         gameState, 
@@ -28,19 +29,20 @@ function App() {
         goToNextStage,
         upgradeMaxHp,
         upgradeSlotCount,
-        upgradeWeaponsClick,
-        damageTaken,
         getShopItems,
         handleBuyWeapon,
-        handleUpgradeWeapons,
-        currentlyProcessingSlotIndex
+        currentlyProcessingSlotIndex,
+        monsterDamagePopups,
+        playerDamagePopups
     } = useGame();
     
     React.useEffect(() => {
         if (gameState === 'GameOver') {
             document.body.classList.add('game-over');
+            setGameOverAnimation(true);
         } else {
             document.body.classList.remove('game-over');
+            setGameOverAnimation(false);
         }
     }, [gameState]);
 
@@ -56,15 +58,6 @@ function App() {
             
             {!showStartScreen && (
                 <>
-                    <div style={{ position: 'relative' }}> 
-                        <DamagePopup damage={damageTaken} />
-                        <PlayerStatus 
-                            player={playerState} 
-                            stage={stage} 
-                            onRestart={restartGame} 
-                        />
-                    </div>
-
                     {gameState === 'InitialSetup' && (
                         <InitialSetup 
                             allEquipment={game.allEquipment}
@@ -74,9 +67,19 @@ function App() {
                     
                     {gameState === 'Combat' && (
                         <>
-                            <MonsterStatus monster={monsterState} />
-                            
-                            <div className="combat-phase">
+                            <div className={`monster-area ${gameOverAnimation ? 'game-over-fall' : ''}`} style={{ position: 'relative' }}>
+                                <MonsterStatus monster={monsterState} />
+                                <DamagePopups popups={monsterDamagePopups} popupType="monster" />
+                            </div>
+                            <div className={`player-area ${gameOverAnimation ? 'game-over-fall' : ''}`} style={{ position: 'relative' }}>
+                                <PlayerStatus 
+                                    player={playerState} 
+                                    stage={stage} 
+                                    onRestart={restartGame} 
+                                />
+                                <DamagePopups popups={playerDamagePopups} popupType="player" />
+                            </div>
+                            <div className={`combat-phase ${gameOverAnimation ? 'game-over-fall' : ''}`}>
                                 <SlotMachine 
                                     slotCount={playerState.slotCount}
                                     slotResults={slotResults}
@@ -100,13 +103,13 @@ function App() {
                             onUpgradeSlot={upgradeSlotCount}
                             onNextStage={goToNextStage}
                             shopItems={getShopItems()} 
-                            handleBuyWeapon={handleBuyWeapon} 
-                            upgradeWeapons={upgradeWeaponsClick} // 이름 수정
+                            handleBuyWeapon={handleBuyWeapon}
+                            game={game}
                         />
                     )}
                     
                     {gameState === 'GameOver' && (
-                        <div className="game-over-container">
+                        <div className="game-over-container game-over-drop">
                             <h1 className="game-over-text">GAME OVER</h1>
                             <button className="btn btn-danger" onClick={restartGame}>다시 도전</button>
                         </div>

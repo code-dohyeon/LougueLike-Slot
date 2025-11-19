@@ -1,6 +1,4 @@
-// src/components/Shop.jsx
-
-import React from 'react';
+import React, { useState } from 'react';
 
 function Shop({ 
     player, 
@@ -10,12 +8,18 @@ function Shop({
     onNextStage, 
     shopItems,
     handleBuyWeapon,
-    upgradeWeapons,
-    updatePlayerState
+    handleUpgradeWeapon,
+    game
 }) {
     const isSlotMaxed = player.slotCount >= 5;
-    console.log(upgradeWeapons);
+    const [selectedWeaponForUpgrade, setSelectedWeaponForUpgrade] = useState(null);
 
+    const handleUpgrade = (weaponId) => {
+        const result = game.upgradeWeapon(weaponId);
+        alert(result.message);
+    };
+
+    const unlockedShopItems = shopItems.filter(item => item.unlocked);
 
     return (
         <div id="shop-container" className="shop-container">
@@ -51,24 +55,11 @@ function Shop({
                         <div className="btn-cost">{isSlotMaxed ? '(최대치)' : '100 Gold'}</div>
                     </div>
                 </button>
-
-                <button 
-                    id="upgrade-weapons-btn" 
-                    className="btn btn-upgrade"
-                    onClick={upgradeWeapons} // 이름 수정
-                    disabled={player.gold < 150}
-                >
-                    <div className="btn-icon">⚔️</div>
-                    <div className="btn-text">
-                        <div>전체 무기 업그레이드</div>
-                        <div className="btn-cost">150 Gold</div>
-                    </div>
-                </button>
             </div>
             
             <h3 className="shop-section-title">🛡️ 구매 가능 무기</h3>
             <div className="shop-item-grid">
-                {shopItems.map(item => (
+                {unlockedShopItems.map(item => (
                     <div key={item.id} className="item-card">
                         <div className="item-icon">
                             {item.type === 'Attack' && '⚔️'}
@@ -93,6 +84,43 @@ function Shop({
                         </button>
                     </div>
                 ))}
+            </div>
+            
+            <h3 className="shop-section-title">⚒️ 장착 무기 업그레이드</h3>
+            <div className="shop-item-grid">
+                {player.equippedWeapons.map(weaponId => {
+                    const weapon = shopItems.find(w => w.id === weaponId);
+                    if (!weapon) return null;
+                    
+                    const currentLevel = player.weaponUpgradeLevels[weaponId] || 0;
+                    const upgradeCost = 100 + currentLevel * 50;
+                    
+                    return (
+                        <div key={weaponId} className="item-card">
+                            <div className="item-icon">
+                                {weapon.type === 'Attack' && '⚔️'}
+                                {weapon.type === 'Defense' && '🛡️'}
+                                {weapon.type === 'Resource' && '💰'}
+                            </div>
+                            
+                            <h4 className="item-name">{weapon.name} Lv.{currentLevel}</h4>
+                            
+                            <p className="item-stats">
+                                {weapon.base_value} {weapon.damage_type || weapon.type}
+                            </p>
+                            
+                            <p className="item-cost">{upgradeCost} 골드</p>
+                            
+                            <button 
+                                className="buy-button"
+                                onClick={() => handleUpgrade(weaponId)}
+                                disabled={player.gold < upgradeCost}
+                            >
+                                업그레이드 (+5)
+                            </button>
+                        </div>
+                    );
+                })}
             </div>
             
             <button 

@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Complete visual redesign with dark theme and premium game aesthetics */
 
 * { 
@@ -766,6 +770,27 @@ body.game-over {
     color: #ef4444;
 }
 
+/* Player Damage Popup 기본 스타일 */
+.player-damage-popup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: popup-move 1s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes popup-move {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translateY(-50px);
+    }
+}
+
 @keyframes damageRise {
     0% { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
     80% { transform: translate(-50%, -150%) scale(1.1); opacity: 1; }
@@ -904,6 +929,124 @@ body.game-over {
     text-align: center;
 }
 
+/* 게임 오버 애니메이션 추가 */
+@keyframes gameOverFall {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(100vh);
+    }
+}
+
+.game-over-fall {
+    animation: gameOverFall 0.8s ease-in forwards;
+}
+
+@keyframes gameOverDrop {
+    0% {
+        opacity: 0;
+        transform: translateY(-100vh);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.game-over-drop {
+    animation: gameOverDrop 0.8s ease-out 0.8s forwards;
+    opacity: 0;
+}
+
+/* 릴 처리 중 스타일 추가 */
+.is-processing {
+    border: 4px solid #fbbf24 !important;
+    box-shadow: 0 0 24px rgba(251, 191, 36, 0.9) !important;
+    transform: scale(1.1) !important;
+}
+
+/* 상점 섹션 스타일 추가 */
+.shop-section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #c4b5fd;
+    margin: 1.5rem 0 1rem 0;
+    text-align: center;
+}
+
+.shop-upgrade-grid {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.shop-upgrade-grid .btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+}
+
+.btn-icon {
+    font-size: 1.5rem;
+}
+
+.btn-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.btn-cost {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+.btn-next-stage {
+    width: 100%;
+    margin-top: 1.5rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: 2px solid rgba(16, 185, 129, 0.5);
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-next-stage:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
+}
+
+/* 2. 릴 컨테이너에 클래스가 붙었을 때, 내부의 릴을 스타일링 */
+.slot-reel-container.is-processing .slot-reel {
+    border: 4px solid #f0e68c; 
+    box-shadow: 0 0 18px rgba(255, 255, 0, 0.9);
+    transform: scale(1.05);
+}
+
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -10px);
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .game-wrapper {
@@ -983,38 +1126,5 @@ body.game-over {
 
     .game-title {
         font-size: 2rem;
-    }
-}
-
-/* style.css 또는 해당하는 CSS 파일 */
-
-
-/* 2. 🚨🚨🚨 [핵심!] 릴 컨테이너에 클래스가 붙었을 때, 내부의 릴을 스타일링 */
-.slot-reel-container.is-processing .slot-reel {
-    /* 릴을 노란색으로 강조하고, 크기를 키우고, 그림자를 넣어라! */
-    border: 4px solid #f0e68c; 
-    box-shadow: 0 0 18px rgba(255, 255, 0, 0.9); /* 강한 하이라이트 */
-    transform: scale(1.05); /* 살짝 커져서 시각적 충격 주기 */
-    /* background-color: #2d1b4e; 배경색도 살짝 바꿔서 대비시키기 */
-}
-
-/* (추가 이펙트 텍스트 스타일) */
-/* .reel-action-effect {
-    position: absolute;
-    bottom: 5px;
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #ffde00;
-    animation: fade .5 ease-in;
-} */
-
-@keyframes fade-up {
-    from {
-        opacity: 0;
-        transform: translate(-50%, 0);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, -10px);
     }
 }

@@ -5,25 +5,31 @@ function GameStart({ onStart }) {
         <div className="game-start-screen">
             <div className="game-start-content">
                 <div className="game-logo">
-                    <span className="logo-icon">🎰</span>
-                    <h1 className="game-title">슬롯 RPG</h1>
+                    <div className="logo-icon">🎰</div>
+                    <h1 className="game-title">SLOT RPG</h1>
                 </div>
-                <p className="game-subtitle">운명의 슬롯을 돌려 몬스터를 물리치세요!</p>
+                
+                <p className="game-subtitle">슬롯을 돌려 몬스터를 처치하세요!</p>
+                
                 <div className="game-features">
                     <div className="feature-item">
-                        <span className="feature-icon">⚔️</span>
-                        <span className="feature-text">전략적 전투</span>
+                        <div className="feature-icon">⚔️</div>
+                        <div className="feature-text">전투</div>
                     </div>
                     <div className="feature-item">
-                        <span className="feature-icon">🛡️</span>
-                        <span className="feature-text">장비 수집</span>
+                        <div className="feature-icon">🛡️</div>
+                        <div className="feature-text">방어</div>
                     </div>
                     <div className="feature-item">
-                        <span className="feature-icon">💰</span>
-                        <span className="feature-text">골드 획득</span>
+                        <div className="feature-icon">💰</div>
+                        <div className="feature-text">보상</div>
                     </div>
                 </div>
-                <button className="btn-game-start" onClick={onStart}>
+                
+                <button 
+                    className="btn-game-start"
+                    onClick={onStart}
+                >
                     게임 시작
                 </button>
             </div>

@@ -1,47 +1,31 @@
-// src/components/MonsterStatus.jsx
-
 import React from 'react';
 
-function MonsterStatus({ monster, damagePopups = [] }) {
-    if (!monster || monster.hp <= 0) {
-        return null;
-    }
-    
-    const maxHP = monster.maxHp;
-    const currentHP = Math.max(0, monster.hp);
-    const hpPercent = (currentHP / maxHP) * 100;
-    const hpColor = currentHP > (maxHP / 2) ? '#ef4444' : currentHP > (maxHP / 5) ? '#fbbf24' : '#4ade80';
+function MonsterStatus({ monster }) {
+    if (!monster) return null;
 
-    // const monsterEmoji = monster.name.includes('슬라임') ? '🟢' :
-    //                     monster.name.includes('고블린') ? '👹' :
-    //                     monster.name.includes('오우거') ? '👿' :
-    //                     monster.name.includes('드래곤') ? '🐉' : '👾';
+    const hpPercentage = Math.max(0, (monster.hp / monster.maxHp) * 100);
+    const displayHp = Math.max(0, Math.floor(monster.hp));
 
     return (
-        <div id="game-status" className="game-status">
-            <div className="monster-info-card">
-                {/* <div className="monster-avatar">{monsterEmoji}</div> */}
-                <div className="monster-details">
-                    <div className="monster-name">{monster.name}</div>
-                    <div className="monster-level">LV. {monster.stage}</div>
-                </div>
+        <div className="game-status">
+            <div className="monster-info">
+                <span>{monster.icon} {monster.type}</span>
+                {monster.isBoss && <span style={{ marginLeft: '10px', color: '#fbbf24' }}>👑 BOSS</span>}
             </div>
-            
-            <div id="monster-hp-bar" className="monster-hp-bar">
+            <div className="monster-hp-bar">
                 <div 
-                    id="monster-hp-fill" 
                     className="monster-hp-fill" 
-                    style={{ width: `${hpPercent}%`, backgroundColor: hpColor }}
-                >
-                    <span className="monster-hp-text">{currentHP} / {maxHP}</span>
-                </div>
+                    style={{ width: `${hpPercentage}%` }}
+                />
             </div>
-            
-            {damagePopups.map(popup => (
-                <div key={popup.id} className={`damage-popup ${popup.type}`}>
-                    {popup.type === 'poisonApply' ? '☠️ POISON!' : `-${popup.value}`}
-                </div>
-            ))}
+            <div style={{ 
+                textAlign: 'center', 
+                marginTop: '0.5rem', 
+                color: '#fca5a5',
+                fontWeight: 'bold'
+            }}>
+                {displayHp} / {monster.maxHp}
+            </div>
         </div>
     );
 }
