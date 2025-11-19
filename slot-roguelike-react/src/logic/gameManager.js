@@ -3,7 +3,6 @@ import Monster from './monster.js';
 import Item from './item.js';
 import SlotMachine from './slotMachine.js';
 import { monsters, equipmentMap, equipment, bosses } from './data.js';
-import PlayerStatus from '../components/PlayerStatus.jsx';
 
 class GameManager {
     constructor() {
@@ -14,6 +13,7 @@ class GameManager {
         this.currentMonster = null; 
         this.stage = 1;
         this.gameState = 'InitialSetup'; 
+        this.shopInventory = []; // 현재 상점 인벤토리
         
         this.loadProgress();
     }
@@ -52,6 +52,75 @@ class GameManager {
         }
         
         this.saveProgress();
+    }
+
+    // 랜덤 상점 아이템 생성
+    generateShopInventory() {
+        // 현재 스테이지 기반으로 레벨 계산
+        // 스테이지 1-10 = 레벨 1, 스테이지 11-20 = 레벨 2
+        const currentLevel = Math.ceil(this.stage / 10);
+        
+        // 구매 가능한 무기 풀
+        // 해금 여부와 관계없이 현재 레벨 이하의 모든 무기
+        let availableWeapons = this.allEquipment.filter(item => {
+            // 무료 아이템 제외
+            if (item.cost === 0) return false;
+            
+            // 이미 장착한 무기 제외
+            if (this.player.equippedWeapons.includes(item.id)) return false;
+            
+            // 현재 레벨 이하의 무기만 (해금 여부 무관)
+            if (item.requiredLevel <= currentLevel) return true;
+            
+            return false;
+        });
+
+        // 현재 레벨 무기를 우선순위로
+        let currentLevelWeapons = availableWeapons.filter(item => 
+            item.requiredLevel === currentLevel
+        );
+        
+        // 이전 레벨 무기들
+        let previousLevelWeapons = availableWeapons.filter(item => 
+            item.requiredLevel < currentLevel
+        );
+
+        // 상점 구성: 현재 레벨 무기 2~3개 + 이전 레벨 무기 1~2개
+        let selectedWeapons = [];
+        
+        // 1. 현재 레벨 무기 중 랜덤 선택 (최대 3개)
+        let currentPoolCopy = [...currentLevelWeapons];
+        const currentCount = Math.min(3, currentPoolCopy.length);
+        for (let i = 0; i < currentCount; i++) {
+            if (currentPoolCopy.length === 0) break;
+            const randomIndex = Math.floor(Math.random() * currentPoolCopy.length);
+            selectedWeapons.push(currentPoolCopy[randomIndex]);
+            currentPoolCopy.splice(randomIndex, 1);
+        }
+        
+        // 2. 이전 레벨 무기로 채우기 (총 4개까지)
+        let previousPoolCopy = [...previousLevelWeapons];
+        while (selectedWeapons.length < 4 && previousPoolCopy.length > 0) {
+            const randomIndex = Math.floor(Math.random() * previousPoolCopy.length);
+            selectedWeapons.push(previousPoolCopy[randomIndex]);
+            previousPoolCopy.splice(randomIndex, 1);
+        }
+        
+        // 3. 그래도 부족하면 전체 풀에서 추가
+        if (selectedWeapons.length < 4) {
+            let remainingPool = availableWeapons.filter(item => 
+                !selectedWeapons.includes(item)
+            );
+            while (selectedWeapons.length < 4 && remainingPool.length > 0) {
+                const randomIndex = Math.floor(Math.random() * remainingPool.length);
+                selectedWeapons.push(remainingPool[randomIndex]);
+                remainingPool.splice(randomIndex, 1);
+            }
+        }
+
+        this.shopInventory = selectedWeapons;
+        console.log(`[상점] 스테이지 ${this.stage}, 레벨 ${currentLevel}, 무기 ${selectedWeapons.length}개 생성`);
+        return this.shopInventory;
     }
 
     calculateMultiplier(resultArray) {
@@ -148,7 +217,11 @@ class GameManager {
         this.player.df = 0;
         
         this.stage++;
-        this.gameState = 'ShopPhase'; 
+        this.gameState = 'ShopPhase';
+        
+        // 상점 인벤토리 생성
+        this.generateShopInventory();
+        
         this.currentMonster = null; 
         
         console.log(`STAGE ${this.stage - 1} 클리어! 골드: +${goldReward}, 경험치: +${expReward}`);
@@ -217,14 +290,6 @@ class GameManager {
         this.gameState = 'Combat';
     }
 
-    _selectAndScaleMonster(monsterList) {
-        const randomIndex = Math.floor(Math.random() * monsterList.length);
-        const monsterData = monsterList[randomIndex];
-        const scaledHp = monsterData.hp + (this.stage - 1) * 10;
-        this.currentMonster = new Monster({...monsterData, hp: scaledHp, maxHp: scaledHp});
-        this.gameState = 'Combat';
-    }
-
     buyAndEquipWeapon(itemId) {
         const itemData = this.allEquipment.find(item => item.id === itemId);
 
@@ -244,6 +309,9 @@ class GameManager {
         this.player.gold -= itemData.cost;
         this.player.equippedWeapons.push(itemId);
         
+        // 상점 인벤토리에서 제거
+        this.shopInventory = this.shopInventory.filter(item => item.id !== itemId);
+        
         return { success: true, message: `${itemData.name}을(를) 구매하고 장착했습니다.` };
     }
 
@@ -262,12 +330,10 @@ class GameManager {
             return { success: false, message: '최소 1개의 무기는 장착해야 합니다!' };
         }
         
-        // 판매 가격은 구매 가격의 50%
         const sellPrice = Math.floor(itemData.cost * 0.5);
         this.player.gold += sellPrice;
         this.player.equippedWeapons = this.player.equippedWeapons.filter(id => id !== itemId);
         
-        // 업그레이드 레벨도 초기화
         if (this.player.weaponUpgradeLevels[itemId]) {
             delete this.player.weaponUpgradeLevels[itemId];
         }
@@ -282,7 +348,7 @@ class GameManager {
         }
         
         const currentLevel = this.player.weaponUpgradeLevels[weaponId] || 0;
-        const upgradeCost = weapon.cost + currentLevel * 50;
+        const upgradeCost = 100 + currentLevel * 50;
         
         if (this.player.gold < upgradeCost) {
             return { success: false, message: `골드가 부족합니다! (필요: ${upgradeCost})` };
@@ -291,16 +357,64 @@ class GameManager {
         this.player.gold -= upgradeCost;
         this.player.weaponUpgradeLevels[weaponId] = currentLevel + 1;
         weapon.base_value += 5;
-
-        // console.log(this.player.gold);
         
         return { 
             success: true, 
             message: `${weapon.name}이(가) Lv.${currentLevel + 1}로 업그레이드되었습니다! (+5 성능 증가)` 
         };
+    }
 
+    // 💡 [새 함수] 현재 상점 인벤토리를 랜덤하게 채우는 함수
+    refreshShop(cost = 0) {
+        if (this.player.gold < cost) {
+            return { success: false, message: `골드가 부족합니다! (필요: ${cost})` };
+        }
         
+        // 1. 골드 차감 (새로고침 비용)
+        this.player.gold -= cost;
+        
+        // 2. 현재 스테이지 레벨 이하의 아이템 목록 필터링
+        const currentChapter = Math.ceil(this.stage / 10);
+        
+        // cost > 0 이고, requiredLevel이 현재 챕터 레벨(currentChapter) 이하인 아이템만 후보로!
+        const availableItems = this.allEquipment.filter(item => 
+            item.cost > 0 && item.requiredLevel <= currentChapter
+        );
+        
+        // 3. 무기 목록을 섞어서 4개를 랜덤하게 선택
+        const shuffledItems = [...availableItems].sort(() => 0.5 - Math.random());
+        
+        // 4. 상점 인벤토리를 새로 갱신 (최대 4개)
+        this.shopInventory = shuffledItems.slice(0, 4).map(item => item.id);
+        
+        // 5. 플레이어 레벨이 0이 아닐 때만 무기 레벨 해금 로직 실행 (선택 사항이지만 안전을 위해)
+        if (this.playerLevel > 0) {
+            this.unlockWeaponsByLevel();
+        }
+        
+        return { success: true, message: `상점을 새로고침했습니다! (${cost} 골드 소모)` };
+    }
 
+    // 💡 몬스터 처치 후 상점 방문 시 자동으로 상점을 새로고침하는 함수 추가
+    // (handleMonsterDefeat 내부에서 호출될 함수)
+    refillShopInventory() {
+        // 비용 없이 새로고침 (스테이지 클리어 보상으로 간주)
+        const result = this.refreshShop(0); 
+        if (!result.success) {
+            console.error("상점 인벤토리 자동 채우기 실패");
+        }
+    }
+
+    // 상점 새로고침 (골드 소모)
+    refreshShop(cost = 50) {
+        if (this.player.gold < cost) {
+            return { success: false, message: '골드가 부족합니다!' };
+        }
+        
+        this.player.gold -= cost;
+        this.generateShopInventory();
+        
+        return { success: true, message: '상점이 새로고침되었습니다!' };
     }
 }
 

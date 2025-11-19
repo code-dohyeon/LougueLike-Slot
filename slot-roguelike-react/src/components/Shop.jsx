@@ -7,17 +7,17 @@ function Shop({
     onUpgradeSlot, 
     onNextStage, 
     shopItems,
+    shopInventory = [], // 랜덤 상점 인벤토리 (기본값 빈 배열)
     handleBuyWeapon,
     handleSellWeapon,
-    game,
-    handleUpgradeWeapon
+    handleRefreshShop, // 상점 새로고침
+    game
 }) {
     const isSlotMaxed = player.slotCount >= 5;
 
     const handleUpgrade = (weaponId) => {
-        const result = handleUpgradeWeapon(weaponId);
-        // console.log(result, result.)
-        alert(result);
+        const result = game.upgradeWeapon(weaponId);
+        alert(result.message);
     };
 
     const handleSell = (weaponId) => {
@@ -25,12 +25,6 @@ function Shop({
             handleSellWeapon(weaponId);
         }
     };
-
-    const availableShopItems = shopItems.filter(item => 
-        item.unlocked && 
-        item.cost > 0 && 
-        !player.equippedWeapons.includes(item.id)
-    );
 
     return (
         <div id="shop-container" className="shop-container">
@@ -68,9 +62,24 @@ function Shop({
                 </button>
             </div>
             
-            <h3 className="shop-section-title">🛡️ 구매 가능 무기</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem' }}>
+                <h3 className="shop-section-title" style={{ margin: 0 }}>🛡️ 무기 상점</h3>
+                <button 
+                    className="btn btn-upgrade"
+                    onClick={handleRefreshShop}
+                    disabled={player.gold < 50}
+                    style={{ 
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.875rem',
+                        background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
+                    }}
+                >
+                    🔄 새로고침 (50G)
+                </button>
+            </div>
+            
             <div className="shop-item-grid">
-                {availableShopItems.length === 0 ? (
+                {shopInventory.length === 0 ? (
                     <div style={{ 
                         color: '#c4b5fd', 
                         padding: '2rem', 
@@ -80,7 +89,7 @@ function Shop({
                         구매 가능한 무기가 없습니다.
                     </div>
                 ) : (
-                    availableShopItems.map(item => (
+                    shopInventory.map(item => (
                         <div key={item.id} className="item-card">
                             <div className="item-icon">
                                 {item.type === 'Attack' && '⚔️'}
@@ -125,7 +134,7 @@ function Shop({
                         if (!weapon) return null;
                         
                         const currentLevel = player.weaponUpgradeLevels[weaponId] || 0;
-                        const upgradeCost = weapon.cost + currentLevel * 50;
+                        const upgradeCost = 100 + currentLevel * 50;
                         const sellPrice = Math.floor(weapon.cost * 0.5);
                         
                         return (

@@ -18,11 +18,12 @@ export const useGame = () => {
     const [stage, setStage] = useState(game.stage);
     const [slotResults, setSlotResults] = useState(null);
     const [isSpinning, setIsSpinning] = useState(false);
+    const [shopInventory, setShopInventory] = useState([]); // 상점 인벤토리
     
     const [currentlyProcessingSlotIndex, setCurrentlyProcessingSlotIndex] = useState(-1);
     const [monsterDamagePopups, setMonsterDamagePopups] = useState([]);
     const [playerDamagePopups, setPlayerDamagePopups] = useState([]);
-    const [resourcePopups, setResourcePopups] = useState([]); // 골드/방어력 팝업
+    const [resourcePopups, setResourcePopups] = useState([]);
     const [showInventory, setShowInventory] = useState(false);
 
     const syncGameState = () => {
@@ -30,6 +31,7 @@ export const useGame = () => {
         setPlayerState({ ...game.player });
         setMonsterState(game.currentMonster ? { ...game.currentMonster } : null);
         setStage(game.stage);
+        setShopInventory([...game.shopInventory]); // 상점 인벤토리 동기화
     };
 
     const startPlayerTurn = useCallback(async () => {
@@ -89,14 +91,12 @@ export const useGame = () => {
                         setMonsterDamagePopups(popups);
                     }
                 } else if (itemResult['type'] === 'Defense') {
-                    // 방어력 획득 팝업
                     setResourcePopups([{ 
                         id: Date.now(), 
                         value: Math.floor(result.defenseGain), 
                         type: 'defense' 
                     }]);
                 } else if (itemResult['type'] === 'Resource') {
-                    // 골드 획득 팝업
                     setResourcePopups([{ 
                         id: Date.now(), 
                         value: Math.floor(result.goldGain), 
@@ -136,7 +136,6 @@ export const useGame = () => {
                     return;
                 }
                 
-                // 쉴드 감소 팝업
                 if (shieldAbsorbed > 0) {
                     setResourcePopups([{ 
                         id: Date.now(), 
@@ -147,7 +146,6 @@ export const useGame = () => {
                     setResourcePopups([]);
                 }
                 
-                // 플레이어 피해 팝업
                 if (damageTaken > 0) {
                     const playerPopup = { id: Date.now(), value: damageTaken, type: 'physical' };
                     setPlayerDamagePopups([playerPopup]);
@@ -217,6 +215,10 @@ export const useGame = () => {
         return game.allEquipment;
     };
 
+    const getShopInventory = () => {
+        return shopInventory;
+    };
+
     const handleBuyWeapon = (itemId) => {
         const result = game.buyAndEquipWeapon(itemId);
         
@@ -229,22 +231,6 @@ export const useGame = () => {
         return result.success;
     };
 
-    // 💡 [새 함수] 무기 개별 업그레이드 핸들러
-    const handleUpgradeWeapon = (weaponId) => {
-        const result = game.upgradeWeapon(weaponId); // gameManager.js의 로직 호출
-
-        if (result.success) {
-            // alert(result.message); // Shop.jsx에서 이미 alert을 띄우고 있으니 중복 방지
-        } else {
-            alert(`업그레이드 실패: ${result.message}`);
-        }
-
-        // 🚨 핵심: GameManager의 상태(골드)를 React 상태에 동기화
-        syncGameState();
-        return result.message;
-    };
-
-
     const handleSellWeapon = (itemId) => {
         const result = game.sellWeapon(itemId);
         
@@ -255,6 +241,17 @@ export const useGame = () => {
         }
         syncGameState();
         return result.success;
+    };
+
+    const handleRefreshShop = () => {
+        const result = game.refreshShop(50);
+        
+        if (result.success) {
+            alert(result.message);
+        } else {
+            alert(result.message);
+        }
+        syncGameState();
     };
 
     const toggleInventory = () => {
@@ -276,14 +273,15 @@ export const useGame = () => {
         upgradeMaxHp,
         upgradeSlotCount,
         getShopItems,
+        getShopInventory,
         handleBuyWeapon,
         handleSellWeapon,
+        handleRefreshShop,
         currentlyProcessingSlotIndex,
         monsterDamagePopups,
         playerDamagePopups,
         resourcePopups,
         showInventory,
         toggleInventory,
-        handleUpgradeWeapon
     };
 };
