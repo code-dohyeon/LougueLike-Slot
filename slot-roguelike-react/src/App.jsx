@@ -36,6 +36,7 @@ function App() {
         resourcePopups,
         showInventory,
         toggleInventory,
+        handleUpgradeWeapon
     } = useGame();
 
     const [showStartScreen, setShowStartScreen] = React.useState(true);
@@ -141,6 +142,7 @@ function App() {
                     shopItems={getShopItems()}
                     handleBuyWeapon={handleBuyWeapon}
                     handleSellWeapon={handleSellWeapon}
+                    handleUpgradeWeapon={handleUpgradeWeapon}
                     game={game}
                 />
             )}

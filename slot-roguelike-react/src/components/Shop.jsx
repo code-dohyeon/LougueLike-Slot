@@ -9,13 +9,15 @@ function Shop({
     shopItems,
     handleBuyWeapon,
     handleSellWeapon,
-    game
+    game,
+    handleUpgradeWeapon
 }) {
     const isSlotMaxed = player.slotCount >= 5;
 
     const handleUpgrade = (weaponId) => {
-        const result = game.upgradeWeapon(weaponId);
-        alert(result.message);
+        const result = handleUpgradeWeapon(weaponId);
+        // console.log(result, result.)
+        alert(result);
     };
 
     const handleSell = (weaponId) => {

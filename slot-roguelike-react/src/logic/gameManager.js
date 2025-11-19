@@ -292,7 +292,7 @@ class GameManager {
         this.player.weaponUpgradeLevels[weaponId] = currentLevel + 1;
         weapon.base_value += 5;
 
-        console.log(this.player.gold);
+        // console.log(this.player.gold);
         
         return { 
             success: true, 

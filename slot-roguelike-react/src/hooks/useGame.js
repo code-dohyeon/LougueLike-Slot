@@ -229,6 +229,22 @@ export const useGame = () => {
         return result.success;
     };
 
+    // 💡 [새 함수] 무기 개별 업그레이드 핸들러
+    const handleUpgradeWeapon = (weaponId) => {
+        const result = game.upgradeWeapon(weaponId); // gameManager.js의 로직 호출
+
+        if (result.success) {
+            // alert(result.message); // Shop.jsx에서 이미 alert을 띄우고 있으니 중복 방지
+        } else {
+            alert(`업그레이드 실패: ${result.message}`);
+        }
+
+        // 🚨 핵심: GameManager의 상태(골드)를 React 상태에 동기화
+        syncGameState();
+        return result.message;
+    };
+
+
     const handleSellWeapon = (itemId) => {
         const result = game.sellWeapon(itemId);
         
@@ -268,5 +284,6 @@ export const useGame = () => {
         resourcePopups,
         showInventory,
         toggleInventory,
+        handleUpgradeWeapon
     };
 };
