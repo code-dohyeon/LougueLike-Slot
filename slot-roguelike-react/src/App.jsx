@@ -147,7 +147,7 @@ function App() {
                     handleUpgradeWeapon={handleUpgradeWeapon}
                     game={game}
                     handleRefreshShop={handleRefreshShop}
-                    shopInventory={getShopInventory}
+                    shopInventory={getShopInventory()}
                 />
             )}
 

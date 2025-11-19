@@ -61,6 +61,8 @@ function Shop({
                     </div>
                 </button>
             </div>
+
+            
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem' }}>
                 <h3 className="shop-section-title" style={{ margin: 0 }}>🛡️ 무기 상점</h3>

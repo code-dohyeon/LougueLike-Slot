@@ -68,11 +68,14 @@ class GameManager {
             if (this.player.equippedWeapons.includes(item.id)) return false;
             
             // 현재 레벨 이하의 무기만 (해금 여부 무관)
+            if(currentLevel === 0) {
+                currentLevel = 1; return true;
+            }
+
             if (item.requiredLevel <= currentLevel) return true;
             
             return false;
         });
-
         // 2. 무기 목록을 랜덤으로 섞기 (Fisher-Yates 셔플 등)
         let shuffledWeapons = [...availableWeapons]
             .sort(() => 0.5 - Math.random());
