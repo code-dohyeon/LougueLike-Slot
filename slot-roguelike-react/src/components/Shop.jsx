@@ -52,7 +52,7 @@ function Shop({
                     id="upgrade-slot-btn" 
                     className="btn btn-upgrade"
                     onClick={onUpgradeSlot}
-                    disabled={isSlotMaxed || player.gold < 100}
+                    disabled={isSlotMaxed || player.gold < 5000}
                 >
                     <div className="btn-icon">🎰</div>
                     <div className="btn-text">
