@@ -1,5 +1,5 @@
 export const equipment = [
-    { id: 'SWD_01', name: '나무 검', type: 'Attack', base_value: 10, damage_type: 'Physical', cost: 0, unlocked: true, requiredLevel: 1 }, 
+    { id: 'SWD_01', name: '나무 검', type: 'Attack', base_value: 100, damage_type: 'Physical', cost: 0, unlocked: true, requiredLevel: 1 }, 
     { id: 'SHD_01', name: '나무 방패', type: 'Defense', base_value: 5, target: 'Player', cost: 0, unlocked: true, requiredLevel: 1 }, 
     { id: 'RSC_01', name: '코인', type: 'Resource', base_value: 10, target: 'Player', cost: 0, unlocked: true, requiredLevel: 1 }, 
     
