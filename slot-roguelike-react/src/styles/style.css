@@ -187,6 +187,21 @@ body::before {
     transition: all 0.3s ease;
 }
 
+/* Player Damage Popup 기본 스타일 */
+.player-damage-popup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    animation: damageRise 1s ease-out forwards;
+    pointer-events: none;
+}
+
+.monster-damage-popup {
+    position: absolute;
+    animation: damageRise 1s ease-out forwards;
+    pointer-events: none;
+}
+
 .monster-info {
     position: relative;
     font-size: 1.5rem;
@@ -491,12 +506,12 @@ body::before {
 }
 
 .spinning {
-    animation: spin 0.1s linear infinite;
+    animation: spin 0.08s linear infinite;
 }
 
 @keyframes spin {
     from { transform: translateY(0); }
-    to { transform: translateY(-80px); }
+    to { transform: translateY(-160px); }
 }
 
 .slot-reel.disabled-reel {
@@ -770,16 +785,6 @@ body.game-over {
     color: #ef4444;
 }
 
-/* Player Damage Popup 기본 스타일 */
-.player-damage-popup {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    animation: popup-move 1s ease-out forwards;
-    pointer-events: none;
-}
-
 @keyframes popup-move {
     0% {
         opacity: 1;
@@ -792,9 +797,25 @@ body.game-over {
 }
 
 @keyframes damageRise {
-    0% { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
-    80% { transform: translate(-50%, -150%) scale(1.1); opacity: 1; }
-    100% { transform: translate(-50%, -200%) scale(1.1); opacity: 0; }
+    0% { 
+        transform: translate(-50%, 0) scale(0.5); 
+        opacity: 0; 
+    }
+    10% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1.2);
+    }
+    20% {
+        transform: translate(-50%, -10px) scale(1);
+    }
+    80% { 
+        transform: translate(-50%, -80px) scale(1); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translate(-50%, -120px) scale(0.8); 
+        opacity: 0; 
+    }
 }
 
 /* InitialSetup Container */
@@ -963,9 +984,12 @@ body.game-over {
 
 /* 릴 처리 중 스타일 추가 */
 .is-processing {
-    border: 4px solid #fbbf24 !important;
-    box-shadow: 0 0 24px rgba(251, 191, 36, 0.9) !important;
-    transform: scale(1.1) !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 
+        0 0 24px rgba(251, 191, 36, 0.9),
+        0 0 48px rgba(251, 191, 36, 0.5) !important;
+    transform: translateY(-4px) scale(1.05) !important;
+    transition: all 0.2s ease-out;
 }
 
 /* 상점 섹션 스타일 추가 */
@@ -1033,7 +1057,8 @@ body.game-over {
 .slot-reel-container.is-processing .slot-reel {
     border: 4px solid #f0e68c; 
     box-shadow: 0 0 18px rgba(255, 255, 0, 0.9);
-    transform: scale(1.05);
+    transform: scale(1.1);
+    transition: transform 0.2s ease-out;
 }
 
 @keyframes fade-up {

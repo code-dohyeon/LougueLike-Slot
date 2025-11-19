@@ -8,25 +8,28 @@ function Shop({
     onNextStage, 
     shopItems,
     handleBuyWeapon,
-    handleUpgradeWeapon,
     game
 }) {
     const isSlotMaxed = player.slotCount >= 5;
-    const [selectedWeaponForUpgrade, setSelectedWeaponForUpgrade] = useState(null);
 
     const handleUpgrade = (weaponId) => {
         const result = game.upgradeWeapon(weaponId);
         alert(result.message);
     };
 
-    const unlockedShopItems = shopItems.filter(item => item.unlocked);
+    // 구매 가능한 무기: 해금되었고, 코스트가 있고, 아직 장착하지 않은 무기
+    const availableShopItems = shopItems.filter(item => 
+        item.unlocked && 
+        item.cost > 0 && 
+        !player.equippedWeapons.includes(item.id)
+    );
 
     return (
         <div id="shop-container" className="shop-container">
             <h2 className="shop-title">✨ STAGE {stage - 1} CLEAR! ✨</h2>
             
             <p className="shop-gold">
-                현재 골드: <span id="shop-gold-value" className="gold-highlight">{player.gold}</span>
+                현재 골드: <span id="shop-gold-value" className="gold-highlight">{Math.floor(player.gold)}</span>
             </p>
 
             <div className="shop-upgrade-grid">
@@ -59,68 +62,90 @@ function Shop({
             
             <h3 className="shop-section-title">🛡️ 구매 가능 무기</h3>
             <div className="shop-item-grid">
-                {unlockedShopItems.map(item => (
-                    <div key={item.id} className="item-card">
-                        <div className="item-icon">
-                            {item.type === 'Attack' && '⚔️'}
-                            {item.type === 'Defense' && '🛡️'}
-                            {item.type === 'Resource' && '💰'}
-                        </div>
-                        
-                        <h4 className="item-name">{item.name}</h4>
-                        
-                        <p className="item-stats">
-                            {item.base_value} {item.damage_type || item.type}
-                        </p>
-                        
-                        <p className="item-cost">{item.cost} 골드</p>
-                        
-                        <button 
-                            className="buy-button"
-                            onClick={() => handleBuyWeapon(item.id)}
-                            disabled={player.gold < item.cost}
-                        >
-                            구매 및 장착
-                        </button>
+                {availableShopItems.length === 0 ? (
+                    <div style={{ 
+                        color: '#c4b5fd', 
+                        padding: '2rem', 
+                        textAlign: 'center',
+                        gridColumn: '1 / -1'
+                    }}>
+                        구매 가능한 무기가 없습니다.
                     </div>
-                ))}
+                ) : (
+                    availableShopItems.map(item => (
+                        <div key={item.id} className="item-card">
+                            <div className="item-icon">
+                                {item.type === 'Attack' && '⚔️'}
+                                {item.type === 'Defense' && '🛡️'}
+                                {item.type === 'Resource' && '💰'}
+                            </div>
+                            
+                            <h4 className="item-name">{item.name}</h4>
+                            
+                            <p className="item-stats">
+                                {item.base_value} {item.damage_type || item.type}
+                            </p>
+                            
+                            <p className="item-cost">{item.cost} 골드</p>
+                            
+                            <button 
+                                className="buy-button"
+                                onClick={() => handleBuyWeapon(item.id)}
+                                disabled={player.gold < item.cost}
+                            >
+                                구매 및 장착
+                            </button>
+                        </div>
+                    ))
+                )}
             </div>
             
             <h3 className="shop-section-title">⚒️ 장착 무기 업그레이드</h3>
             <div className="shop-item-grid">
-                {player.equippedWeapons.map(weaponId => {
-                    const weapon = shopItems.find(w => w.id === weaponId);
-                    if (!weapon) return null;
-                    
-                    const currentLevel = player.weaponUpgradeLevels[weaponId] || 0;
-                    const upgradeCost = 100 + currentLevel * 50;
-                    
-                    return (
-                        <div key={weaponId} className="item-card">
-                            <div className="item-icon">
-                                {weapon.type === 'Attack' && '⚔️'}
-                                {weapon.type === 'Defense' && '🛡️'}
-                                {weapon.type === 'Resource' && '💰'}
+                {player.equippedWeapons.length === 0 ? (
+                    <div style={{ 
+                        color: '#c4b5fd', 
+                        padding: '2rem', 
+                        textAlign: 'center',
+                        gridColumn: '1 / -1'
+                    }}>
+                        장착된 무기가 없습니다.
+                    </div>
+                ) : (
+                    player.equippedWeapons.map(weaponId => {
+                        const weapon = shopItems.find(w => w.id === weaponId);
+                        if (!weapon) return null;
+                        
+                        const currentLevel = player.weaponUpgradeLevels[weaponId] || 0;
+                        const upgradeCost = 100 + currentLevel * 50;
+                        
+                        return (
+                            <div key={weaponId} className="item-card">
+                                <div className="item-icon">
+                                    {weapon.type === 'Attack' && '⚔️'}
+                                    {weapon.type === 'Defense' && '🛡️'}
+                                    {weapon.type === 'Resource' && '💰'}
+                                </div>
+                                
+                                <h4 className="item-name">{weapon.name} Lv.{currentLevel}</h4>
+                                
+                                <p className="item-stats">
+                                    {weapon.base_value} {weapon.damage_type || weapon.type}
+                                </p>
+                                
+                                <p className="item-cost">{upgradeCost} 골드</p>
+                                
+                                <button 
+                                    className="buy-button"
+                                    onClick={() => handleUpgrade(weaponId)}
+                                    disabled={player.gold < upgradeCost}
+                                >
+                                    업그레이드 (+5)
+                                </button>
                             </div>
-                            
-                            <h4 className="item-name">{weapon.name} Lv.{currentLevel}</h4>
-                            
-                            <p className="item-stats">
-                                {weapon.base_value} {weapon.damage_type || weapon.type}
-                            </p>
-                            
-                            <p className="item-cost">{upgradeCost} 골드</p>
-                            
-                            <button 
-                                className="buy-button"
-                                onClick={() => handleUpgrade(weaponId)}
-                                disabled={player.gold < upgradeCost}
-                            >
-                                업그레이드 (+5)
-                            </button>
-                        </div>
-                    );
-                })}
+                        );
+                    })
+                )}
             </div>
             
             <button 

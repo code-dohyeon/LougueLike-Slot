@@ -16,7 +16,9 @@ function DamagePopups({ popups = [], popupType = 'player' }) {
     return (
         <>
             {popups.map((popup, idx) => {
-                const offset = Math.floor(Math.random() * 40) - 20; // -20~+20px 랜덤 오프셋
+                const offset = Math.floor(Math.random() * 60) - 30; // -30~+30px 랜덤 오프셋
+                const verticalOffset = idx * 30; // 여러 팝업이 겹치지 않도록 세로 간격
+                
                 return (
                     <div
                         key={popup.id}
@@ -24,14 +26,20 @@ function DamagePopups({ popups = [], popupType = 'player' }) {
                         style={{
                             color: typeInfo[popup.type]?.color || '#fff',
                             fontWeight: 'bold',
-                            fontSize: '1.5rem',
-                            textShadow: '0 0 8px #000',
+                            fontSize: '1.8rem',
+                            textShadow: `
+                                0 0 10px ${typeInfo[popup.type]?.color || '#000'},
+                                0 0 20px ${typeInfo[popup.type]?.color || '#000'},
+                                2px 2px 4px #000
+                            `,
                             position: 'absolute',
                             left: `calc(50% + ${offset}px)`,
+                            top: `calc(50% + ${verticalOffset}px)`,
                             transform: 'translateX(-50%)',
-                            zIndex: 10,
+                            zIndex: 10 + idx,
                             pointerEvents: 'none',
-                            transition: 'top 0.8s cubic-bezier(.17,.67,.83,.67)'
+                            animation: 'damageRise 1s ease-out forwards',
+                            opacity: 0
                         }}
                     >
                         {typeInfo[popup.type]?.icon || ''} -{popup.value}

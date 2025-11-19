@@ -4,27 +4,27 @@ export const equipment = [
     { id: 'RSC_01', name: '코인', type: 'Resource', base_value: 50, target: 'Player', cost: 0, unlocked: true, requiredLevel: 0 }, 
     
     // 레벨 1 해금 무기 (스테이지 1-10 클리어 후)
-    { id: 'DGR_01', name: '독 단검', type: 'Attack', base_value: 4, damage_type: 'Poison', cost: 150, unlocked: false, requiredLevel: 1 }, 
+    { id: 'DGR_01', name: '독 단검', type: 'Attack', base_value: 4, damage_type: 'Poison', cost: 150, unlocked: true, requiredLevel: 1 }, 
     { id: 'AXE_01', name: '양날 도끼', type: 'Attack', base_value: 15, damage_type: 'Physical', cost: 300, unlocked: false, requiredLevel: 1 },
     { id: 'SHD_02', name: '강철 방패', type: 'Defense', base_value: 10, target: 'Player', cost: 350, unlocked: false, requiredLevel: 1 },
     { id: 'RSC_02', name: '은화 주머니', type: 'Resource', base_value: 100, target: 'Player', cost: 200, unlocked: false, requiredLevel: 1 },
     
     // 레벨 2 해금 무기 (스테이지 11-20 클리어 후)
     { id: 'SWD_02', name: '강철 검', type: 'Attack', base_value: 25, damage_type: 'Physical', cost: 400, unlocked: false, requiredLevel: 2 },
-    { id: 'SWD_03', name: '화염 검', type: 'Attack', base_value: 35, damage_type: 'Fire', cost: 600, unlocked: false, requiredLevel: 2 },
+    { id: 'SWD_03', name: '화염 검', type: 'Attack', base_value: 35, damage_type: 'Fire', cost: 600, unlocked: true, requiredLevel: 2 },
     { id: 'SHD_03', name: '기사 방패', type: 'Defense', base_value: 15, target: 'Player', cost: 550, unlocked: false, requiredLevel: 2 },
     { id: 'RSC_03', name: '금화 주머니', type: 'Resource', base_value: 150, target: 'Player', cost: 400, unlocked: false, requiredLevel: 2 },
     
     // 레벨 3 해금 무기 (스테이지 21-30 클리어 후)
-    { id: 'SWD_04', name: '얼음 검', type: 'Attack', base_value: 38, damage_type: 'Ice', cost: 700, unlocked: false, requiredLevel: 3 },
-    { id: 'SWD_05', name: '번개 검', type: 'Attack', base_value: 42, damage_type: 'Lightning', cost: 850, unlocked: false, requiredLevel: 3 },
+    { id: 'SWD_04', name: '얼음 검', type: 'Attack', base_value: 38, damage_type: 'Ice', cost: 700, unlocked: true, requiredLevel: 3 },
+    { id: 'SWD_05', name: '번개 검', type: 'Attack', base_value: 42, damage_type: 'Lightning', cost: 850, unlocked: true, requiredLevel: 3 },
     { id: 'BOW_01', name: '긴 활', type: 'Attack', base_value: 30, damage_type: 'Physical', cost: 500, unlocked: false, requiredLevel: 3 },
     { id: 'SHD_04', name: '용의 방패', type: 'Defense', base_value: 20, target: 'Player', cost: 800, unlocked: false, requiredLevel: 3 },
     { id: 'RSC_04', name: '보석', type: 'Resource', base_value: 250, target: 'Player', cost: 700, unlocked: false, requiredLevel: 3 },
     
     // 레벨 4 해금 무기 (스테이지 31-40 클리어 후)
-    { id: 'SWD_06', name: '신성 검', type: 'Attack', base_value: 50, damage_type: 'Holy', cost: 1000, unlocked: false, requiredLevel: 4 },
-    { id: 'DGR_02', name: '암흑 단검', type: 'Attack', base_value: 55, damage_type: 'Dark', cost: 1200, unlocked: false, requiredLevel: 4 },
+    { id: 'SWD_06', name: '신성 검', type: 'Attack', base_value: 50, damage_type: 'Holy', cost: 1000, unlocked: true, requiredLevel: 4 },
+    { id: 'DGR_02', name: '암흑 단검', type: 'Attack', base_value: 55, damage_type: 'Dark', cost: 1200, unlocked: true, requiredLevel: 4 },
     { id: 'BOW_02', name: '엘프의 활', type: 'Attack', base_value: 45, damage_type: 'Magic', cost: 900, unlocked: false, requiredLevel: 4 },
     { id: 'SHD_05', name: '신성 방패', type: 'Defense', base_value: 25, target: 'Player', cost: 1200, unlocked: false, requiredLevel: 4 },
     { id: 'RSC_05', name: '루비', type: 'Resource', base_value: 400, target: 'Player', cost: 1200, unlocked: false, requiredLevel: 4 },

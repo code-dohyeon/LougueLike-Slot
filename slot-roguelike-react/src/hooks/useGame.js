@@ -4,14 +4,13 @@ import React from 'react';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-const PLAYER_TURN_DELAY = 1000;
-const MONSTER_TURN_DELAY = 1000; 
-const ACTION_DELAY = 500;
+const SPIN_DURATION = 800; // 스핀 애니메이션 시간
+const RESULT_SHOW_DELAY = 300; // 결과 표시 후 대기
+const ACTION_DELAY = 200; // 각 슬롯 처리 간 딜레이 (데미지 팝업용)
+const MONSTER_TURN_DELAY = 800; // 몬스터 턴 전 대기
 
 export const useGame = () => {
     const game = useMemo(() => new GameManager(), []);
-    
-    const [damagePopups, setDamagePopups] = useState([]);
     
     const [gameState, setGameState] = useState(game.gameState);
     const [playerState, setPlayerState] = useState({ ...game.player });
@@ -19,7 +18,6 @@ export const useGame = () => {
     const [stage, setStage] = useState(game.stage);
     const [slotResults, setSlotResults] = useState(null);
     const [isSpinning, setIsSpinning] = useState(false);
-    const [damageTaken, setDamageTaken] = useState(0);
     
     const [currentlyProcessingSlotIndex, setCurrentlyProcessingSlotIndex] = useState(-1);
     const [monsterDamagePopups, setMonsterDamagePopups] = useState([]);
@@ -40,139 +38,110 @@ export const useGame = () => {
             setSlotResults(null);
             setCurrentlyProcessingSlotIndex(-1);
             
-            await delay(PLAYER_TURN_DELAY);
-
-            const results = game.slotMachine.spin(game.player.slotCount); 
+            // 1. 스핀 결과 미리 계산
+            const results = game.slotMachine.spin(game.player.slotCount);
             const multiplier = game.calculateMultiplier(results);
 
-            setSlotResults(results);
-            await delay(1000); 
-            setIsSpinning(false); 
-            await delay(500);
+            // 2. 스핀 애니메이션 시작 (결과는 아직 안 보여줌)
+            await delay(SPIN_DURATION);
 
+            // 3. 스핀 멈추고 결과 표시
+            setSlotResults(results);
+            setIsSpinning(false);
+            await delay(RESULT_SHOW_DELAY);
+
+            // 4. 각 슬롯 결과 처리 (데미지 팝업 동시 표시, 딜레이 최소화)
             for (let i = 0; i < results.length; i++) {
                 setCurrentlyProcessingSlotIndex(i);
-                syncGameState();
                 
                 const itemResult = results[i];
                 const result = game.processSingleSlotResult(itemResult, multiplier);
                 
                 syncGameState();
                 
+                // 공격 타입일 때만 데미지 팝업 표시
                 if(itemResult['type'] === 'Attack') {
-                    let currentPopups = [];
+                    const popups = [];
                     
                     if (result.physicalDamage > 0) {
-                        currentPopups.push({ 
-                            id: Date.now() + Math.random(), 
-                            value: Math.floor(result.physicalDamage), 
-                            type: 'physical' 
-                        });
+                        popups.push({ id: Date.now() + Math.random(), value: Math.floor(result.physicalDamage), type: 'physical' });
                     }
                     if (result.poisonDamage > 0) {
-                        currentPopups.push({ 
-                            id: Date.now() + Math.random(), 
-                            value: Math.floor(result.poisonDamage), 
-                            type: 'poison' 
-                        });
+                        popups.push({ id: Date.now() + Math.random() + 0.1, value: Math.floor(result.poisonDamage), type: 'poison' });
                     }
                     if (result.fireDamage > 0) {
-                        currentPopups.push({ 
-                            id: Date.now() + Math.random(), 
-                            value: Math.floor(result.fireDamage), 
-                            type: 'fire' 
-                        });
+                        popups.push({ id: Date.now() + Math.random() + 0.2, value: Math.floor(result.fireDamage), type: 'fire' });
                     }
                     if (result.iceDamage > 0) {
-                        currentPopups.push({ 
-                            id: Date.now() + Math.random(), 
-                            value: Math.floor(result.iceDamage), 
-                            type: 'ice' 
-                        });
+                        popups.push({ id: Date.now() + Math.random() + 0.3, value: Math.floor(result.iceDamage), type: 'ice' });
                     }
                     if (result.lightningDamage > 0) {
-                        currentPopups.push({ 
-                            id: Date.now() + Math.random(), 
-                            value: Math.floor(result.lightningDamage), 
-                            type: 'lightning' 
-                        });
+                        popups.push({ id: Date.now() + Math.random() + 0.4, value: Math.floor(result.lightningDamage), type: 'lightning' });
                     }
                     if (result.holyDamage > 0) {
-                        currentPopups.push({ 
-                            id: Date.now() + Math.random(), 
-                            value: Math.floor(result.holyDamage), 
-                            type: 'holy' 
-                        });
+                        popups.push({ id: Date.now() + Math.random() + 0.5, value: Math.floor(result.holyDamage), type: 'holy' });
                     }
                     if (result.darkDamage > 0) {
-                        currentPopups.push({ 
-                            id: Date.now() + Math.random(), 
-                            value: Math.floor(result.darkDamage), 
-                            type: 'dark' 
-                        });
+                        popups.push({ id: Date.now() + Math.random() + 0.6, value: Math.floor(result.darkDamage), type: 'dark' });
                     }
                     if (result.magicDamage > 0) {
-                        currentPopups.push({ 
-                            id: Date.now() + Math.random(), 
-                            value: Math.floor(result.magicDamage), 
-                            type: 'magic' 
-                        });
+                        popups.push({ id: Date.now() + Math.random() + 0.7, value: Math.floor(result.magicDamage), type: 'magic' });
                     }
                     
-                    for (let popup of currentPopups) {
-                        setMonsterDamagePopups([popup]);
-                        await delay(800);
-                        setMonsterDamagePopups([]);
-                        await delay(200);
+                    // 모든 데미지 팝업 동시에 표시
+                    if (popups.length > 0) {
+                        setMonsterDamagePopups(popups);
                     }
                 }
 
+                // 몬스터 처치 확인
                 if (game.currentMonster && game.currentMonster.hp <= 0) {
-                    game.handleMonsterDefeat(); 
+                    game.handleMonsterDefeat();
                     syncGameState();
                     setCurrentlyProcessingSlotIndex(-1);
-                    setIsSpinning(false);
+                    setMonsterDamagePopups([]);
                     return;
                 }
 
-                await delay(ACTION_DELAY); 
+                // 짧은 딜레이 (팝업이 보이도록)
+                await delay(ACTION_DELAY);
+                setMonsterDamagePopups([]); // 팝업 클리어
             }
             
             setCurrentlyProcessingSlotIndex(-1);
             
+            // 5. 몬스터 턴
             if (game.gameState === 'Combat') {
-                await delay(MONSTER_TURN_DELAY); 
-                const { damageTaken, status: monsterStatus, poisonDamage } = game.monsterAttack(); 
+                await delay(MONSTER_TURN_DELAY);
+                
+                const { damageTaken, status: monsterStatus, poisonDamage } = game.monsterAttack();
                 syncGameState();
 
+                // 독 데미지 팝업
                 if (poisonDamage > 0) {
                     setMonsterDamagePopups([{ id: Date.now(), value: poisonDamage, type: 'poison' }]);
-                    await delay(800);
+                    await delay(600);
                     setMonsterDamagePopups([]);
-                    await delay(200);
                 }
 
+                // 승리 체크
                 if (monsterStatus === 'win') {
-                    setIsSpinning(false);
-                    return; 
+                    return;
                 }
                 
+                // 플레이어 피해 팝업
                 if (damageTaken > 0) {
-                    const playerPopup = {
-                        id: Date.now(),
-                        value: damageTaken,
-                        type: 'physical',
-                    };
+                    const playerPopup = { id: Date.now(), value: damageTaken, type: 'physical' };
                     setPlayerDamagePopups([playerPopup]);
-                    await delay(1200);
+                    await delay(800);
                     setPlayerDamagePopups([]);
                 }
                 
                 syncGameState();
                 
+                // 패배 체크
                 if (monsterStatus === 'lose') {
                     setGameState('GameOver');
-                    setIsSpinning(false);
                     return;
                 }
             }
@@ -185,7 +154,7 @@ export const useGame = () => {
     }, [gameState, isSpinning, game]);
 
     const goToNextStage = () => {
-        game.gameState = 'Combat'; 
+        game.gameState = 'Combat';
         game.prepareNextCombat();
         setSlotResults(null);
         syncGameState();
@@ -221,14 +190,14 @@ export const useGame = () => {
             alert(`슬롯 개수가 ${game.player.slotCount}개로 증가했습니다!`);
             syncGameState();
         } else if(game.player.slotCount >= 5) {
-            alert("이미 최대 슬롯 개수입니다.!");
+            alert("이미 최대 슬롯 개수입니다!");
         } else {
             alert("골드가 부족합니다!");
         }
     };
 
     const getShopItems = () => {
-        return game.allEquipment.filter(item => item.cost > 0); 
+        return game.allEquipment.filter(item => item.cost > 0);
     };
 
     const handleBuyWeapon = (itemId) => {
@@ -243,11 +212,6 @@ export const useGame = () => {
         return result.success;
     };
 
-    React.useEffect(() => {
-        console.log('Player Damage Popups:', playerDamagePopups);
-        console.log('Monster Damage Popups:', monsterDamagePopups);
-    }, [playerDamagePopups, monsterDamagePopups]);
-
     return {
         game,
         gameState,
@@ -256,7 +220,6 @@ export const useGame = () => {
         stage,
         slotResults,
         isSpinning,
-        damageTaken,
         startPlayerTurn,
         goToNextStage,
         restartGame,
@@ -265,7 +228,6 @@ export const useGame = () => {
         upgradeSlotCount,
         getShopItems,
         handleBuyWeapon,
-        damagePopups,
         currentlyProcessingSlotIndex,
         monsterDamagePopups,
         playerDamagePopups,
