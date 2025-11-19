@@ -44,7 +44,7 @@ body::before {
 .game-wrapper {
     position: relative;
     z-index: 1;
-    max-width: 1200px;
+    max-width: 900px;
     width: 100%;
     height: 100vh;
     margin: 0 auto;
@@ -678,18 +678,46 @@ body::before {
 }
 
 .shop-scrollable-content {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    margin: 0 -0.5rem;
-    padding: 0 0.5rem;
+    flex: 1; 
+    overflow-y: hidden; /* 💥💥 세로 스크롤 강제 제거! (네 요구사항) */
+    overflow-x: hidden; /* 가로 스크롤은 자식이 담당 */
+    margin: 0; /* 불필요한 마진 제거 */
+    padding: 0; /* 불필요한 패딩 제거 */
+    min-height: 0; 
+    scroll-behavior: smooth;
 }
 
 .shop-item-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.6rem;
-    margin: 0.5rem 0;
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+    overflow-x: auto; /* 가로 스크롤 활성화 */
+    overflow-y: hidden; 
+    flex-wrap: nowrap; 
+    max-width: none; /* 이전의 max-width 제한 해제 */
+    
+    /* 💥💥 호버 이벤트를 위한 좌우 패딩 확보 및 스크롤바 공간 확보 */
+    padding: 1rem 0 1rem 0.75rem; /* 좌우 1rem 패딩으로 넉넉하게, 아래 0.75rem은 스크롤바 공간 */
+    margin: 0.5rem 0; /* 파트 간 수직 간격만 유지 */
+}
+
+.shop-item-grid::-webkit-scrollbar {
+    height: 8px; /* 스크롤바 높이 */
+    background-color: transparent; 
+}
+
+.shop-item-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.15); /* 트랙 색상 */
+    border-radius: 4px;
+}
+
+.shop-item-grid::-webkit-scrollbar-thumb {
+    background: #8b5cf6; /* 썸 색상 (보라색) */
+    border-radius: 4px;
+}
+
+.shop-item-grid::-webkit-scrollbar-thumb:hover {
+    background: #7c3aed; /* 호버 시 색상 */
 }
 
 .item-card {
@@ -703,6 +731,32 @@ body::before {
     gap: 0.4rem;
     transition: all 0.3s ease;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    min-width: 170px; /* 💥💥 추가: 카드가 찌그러지지 않도록 최소 폭 강제 */
+    width: 170px; /* 💥💥 추가: 카드 폭을 고정 */
+    flex-shrink: 0; /* 💥💥 추가: 찌그러지지 않도록 강제 축소 방지 */
+    /* 💥💥💥 카드 높이 문제 해결 (핵심) 💥💥💥 */
+    height: 100%; /* 부모(.shop-item-grid)의 높이를 꽉 채우게 강제! */
+    display: flex; /* 내부 컨텐츠를 수직으로 관리하기 위해 Flex 컨테이너로 만듦 */
+    flex-direction: column;
+    min-height: 0; /* Flexbox에서의 높이 문제 해결 */
+}
+
+/* 💥💥 새로 추가: 카드 내부의 텍스트 영역이 남은 공간을 모두 차지하도록 함 (핵심) 💥💥 */
+.item-body {
+    flex: 1; /* 💥💥 이게 핵심! 남은 수직 공간을 모두 차지하고 버튼을 아래로 민다! */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* 텍스트를 위에서부터 채움 */
+    margin-bottom: 0.5rem; /* 버튼 영역과 약간의 여백 */
+    /* 💥💥 텍스트가 넘치면 텍스트 영역 내에서 스크롤되도록 설정 (최후의 안전장치) */
+    overflow-y: auto; 
+    min-height: 0; 
+}
+
+.item-card > button.buy-button, 
+.item-card > div:last-child {
+    flex-shrink: 0; /* 버튼이 줄어들지 않도록 고정 */
+    /* margin-top: auto는 제거해야 함 */
 }
 
 .item-card:hover {
