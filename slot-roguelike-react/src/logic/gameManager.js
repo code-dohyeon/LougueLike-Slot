@@ -18,7 +18,7 @@ class GameManager {
         this.unlockedWeapons = [];
         
         this.loadProgress();
-        this.restartGame();
+        // this.restartGame();
     }
     
     loadProgress() {
