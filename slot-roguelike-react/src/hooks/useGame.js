@@ -27,6 +27,8 @@ export const useGame = () => {
     const [playerDamagePopups, setPlayerDamagePopups] = useState([]);
     const [resourcePopups, setResourcePopups] = useState([]);
     const [showInventory, setShowInventory] = useState(false);
+// 💡 콤보 이펙트 상태 추가
+    const [comboTriggered, setComboTriggered] = useState(false);
 
     const syncGameState = () => {
         setGameState(game.gameState);
@@ -41,6 +43,7 @@ export const useGame = () => {
         
         setIsSpinning(true);
         setIsBlocked(true);
+        setComboTriggered(false); // 💡 새 턴 시작 시 콤보 상태 초기화
 
         try {
             setSlotResults(null);
@@ -122,18 +125,78 @@ export const useGame = () => {
                 await delay(ACTION_DELAY);
                 setMonsterDamagePopups([]);
                 setResourcePopups([]);
+                // 💡 콤보 체크 로직 추가: 마지막 슬롯 처리 후
+                if (i === results.length - 1) {
+                    // game.js에 콤보 체크 로직이 있다고 가정
+                    // 예시: game.checkCombo(results)가 콤보 성공 여부를 bool 값으로 반환한다고 가정
+                    if (game.checkCombo(results)) { // 💥 gameManager.js에 checkCombo 함수가 필요합니다.
+                        setComboTriggered(true); // 콤보 성공!
+                    }
+                }
             }
             
             setCurrentlyProcessingSlotIndex(-1);
             
+            
+
             if (game.gameState === 'Combat') {
                 await delay(MONSTER_TURN_DELAY);
                 
-                const { damageTaken, status: monsterStatus, poisonDamage, shieldAbsorbed } = game.monsterAttack();
+                // 💡 수정: damageReport에 기본값 { Poison: 0, Fire: 0 }을 설정
+                const { 
+                    damageTaken, 
+                    status: monsterStatus, 
+                    poisonDamage, 
+                    shieldAbsorbed, 
+                    skippedTurn, 
+                    isFrozenSkip,
+                    damageReport = { Poison: 0, Fire: 0 } // <-- 이 부분을 추가/수정
+                } = game.monsterAttack();
+                
                 syncGameState();
 
-                if (poisonDamage > 0) {
-                    setMonsterDamagePopups([{ id: Date.now(), value: poisonDamage, type: 'poison' }]);
+                if (monsterStatus === 'win') {
+                    setIsBlocked(false);
+                    return;
+                }
+
+                // --- 턴 스킵 로직 ---
+                if (skippedTurn) { 
+                    // 💥 몬스터 턴 스킵 시 Frozen 이펙트 표시 로직 추가 💥
+                    
+                    // 턴 스킵 시에도 도트딜 팝업을 속성별로 표시
+                    if (damageReport.Poison > 0 || damageReport.Fire > 0) { 
+                        const dotPopups = [];
+                        // 1. 독 데미지 팝업
+                        if (damageReport.Poison > 0) dotPopups.push({ id: Date.now() + 0.1, value: damageReport.Poison, type: 'poison' });
+                        // 2. 🔥 불 데미지 팝업: type을 'fire'로 정확하게 지정
+                        if (damageReport.Fire > 0) dotPopups.push({ id: Date.now() + 0.2, value: damageReport.Fire, type: 'fire' }); 
+                        setMonsterDamagePopups(dotPopups); 
+                        await delay(600);
+                        setMonsterDamagePopups([]);
+                    }
+                    
+                    if (game.currentMonster && game.currentMonster.hp <= 0) {
+                        await delay(DEATH_DELAY);
+                        game.handleMonsterDefeat();
+                        syncGameState();
+                        setIsBlocked(false);
+                        return;
+                    }
+                    
+                    // 턴 스킵 시에는 물리 공격을 건너뛰고 다음 턴으로
+                    setIsBlocked(false);
+                    return;
+                }
+
+                // --- 턴 스킵이 아닐 때 로직 ---
+                if (damageReport.Poison > 0 || damageReport.Fire > 0) {
+                    const dotPopups = [];
+                    // 1. 독 데미지 팝업
+                    if (damageReport.Poison > 0) dotPopups.push({ id: Date.now() + 0.1, value: damageReport.Poison, type: 'poison' });
+                    // 2. 🔥 불 데미지 팝업: type을 'fire'로 정확하게 지정
+                    if (damageReport.Fire > 0) dotPopups.push({ id: Date.now() + 0.2, value: damageReport.Fire, type: 'fire' });
+                    setMonsterDamagePopups(dotPopups); 
                     await delay(600);
                     setMonsterDamagePopups([]);
                     
@@ -183,6 +246,15 @@ export const useGame = () => {
         } finally {
             setIsSpinning(false);
             setIsBlocked(false);
+        }
+
+        return {
+            comboTriggered,
+            setComboTriggered,
+            monsterDamagePopups,
+            playerDamagePopups,
+            resourcePopups,
+            currentlyProcessingSlotIndex,
         }
     }, [gameState, isSpinning, isBlocked, game]);
 

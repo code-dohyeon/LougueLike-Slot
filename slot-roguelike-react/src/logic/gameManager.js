@@ -167,7 +167,7 @@ class GameManager {
         let comboCheck = 0;
         
         for(let i = 0; i < resultArray.length - 1; i++) {
-            if(resultArray[i].type === resultArray[i+1].type) { 
+            if(resultArray[i].id === resultArray[i+1].id) { 
                 comboCheck++;
                 if(comboCheck >= 2) {
                     return 3.0; 
@@ -180,10 +180,20 @@ class GameManager {
         return 1.0;
     }
 
+    checkCombo(slotResults) {
+        if (slotResults.length < 3) {
+            return false;
+        }
+        // 마지막 3개 슬롯의 타입이 모두 같은지 확인 (예: Attack, Attack, Attack)
+        const lastThree = slotResults.slice(-3);
+        const firstType = lastThree[0].type;
+        return lastThree.every(slot => slot.type === firstType);
+    }
+
     processSingleSlotResult(itemResult, multiplier) {
         if (itemResult.type !== 'Attack') {
-            this.item.processSlotResult(
-                [itemResult],
+            const result = this.item.processSlotResult(
+                [itemResult], 
                 this.currentMonster,
                 this.player,
                 multiplier
@@ -197,54 +207,63 @@ class GameManager {
                 holyDamage: 0,
                 darkDamage: 0,
                 magicDamage: 0,
-                defenseGain: itemResult.type === 'Defense' ? itemResult.base_value * multiplier : 0,
-                goldGain: itemResult.type === 'Resource' ? itemResult.base_value * multiplier : 0
+                // 💡 수정: 중복된 필드를 제거하고 item.js의 result에서 가져온 값만 사용
+                defenseGain: result.defenseGain, 
+                goldGain: result.goldGain 
             };
         }
         
-        // Attack 타입일 경우, 각 속성별로 개별 처리
+        // 💥 Attack 타입일 경우, 데미지 및 상태이상 적용
         const damage = itemResult.base_value * multiplier;
+        const damage_type = itemResult.damage_type;
+        let actualDamageTaken = 0;
+        
+        // 1. Holy/Dark/Magic처럼 특수한 데미지 계산이 필요한 경우 먼저 처리
+        if (damage_type === 'Holy') {
+            // Holy: 상대 최대 체력 비례 데미지
+            const holyDamage = this.currentMonster.maxHp * 0.1;
+            actualDamageTaken = this.currentMonster.takeDamage(holyDamage, true); // true: 쉴드 무시
+        } else if (damage_type === 'Dark') {
+            // Dark: 즉사 확률 적용 (데미지도 들어야 하니 일반 공격 먼저)
+            actualDamageTaken = this.currentMonster.takeDamage(damage); 
+            
+            // 즉사 확률 적용 로직을 item.js로 옮기는 것이 깔끔함.
+            // 여기서는 기본 데미지만 처리하고, item.js에서 상태이상(즉사)을 처리하자.
+        } else if (damage_type === 'Magic') {
+            // Magic: 쉴드 무시하고 체력에 직접 피해
+            actualDamageTaken = this.currentMonster.takeDamage(damage, true); // true: 쉴드 무시
+        } else {
+            // Physical, Poison, Fire, Ice, Lightning 등 일반 공격
+            actualDamageTaken = this.currentMonster.takeDamage(damage);
+        }
+
+        // 2. 상태 이상 적용 (item.js 호출)
+        const statusResult = this.item.processSlotResult(
+            [itemResult], // Attack 타입이 item.js로 들어감
+            this.currentMonster,
+            this.player,
+            multiplier
+        );
+
+        // 3. 반환값 정리 (Attack 타입)
         const result = {
-            physicalDamage: 0,
-            poisonDamage: 0,
-            fireDamage: 0,
-            iceDamage: 0,
-            lightningDamage: 0,
-            holyDamage: 0,
-            darkDamage: 0,
-            magicDamage: 0,
+            physicalDamage: damage_type === 'Physical' ? actualDamageTaken : 0,
+            poisonDamage: damage_type === 'Poison' ? actualDamageTaken : 0, 
+            fireDamage: damage_type === 'Fire' ? actualDamageTaken : 0,
+            iceDamage: damage_type === 'Ice' ? actualDamageTaken : 0,
+            lightningDamage: damage_type === 'Lightning' ? actualDamageTaken : 0,
+            holyDamage: damage_type === 'Holy' ? actualDamageTaken : 0,
+            darkDamage: damage_type === 'Dark' ? actualDamageTaken : 0,
+            magicDamage: damage_type === 'Magic' ? actualDamageTaken : 0,
             defenseGain: 0,
             goldGain: 0
         };
-        
-        // 속성별로 몬스터에게 데미지 적용
-        switch(itemResult.damage_type) {
-            case 'Physical':
-                result.physicalDamage = this.currentMonster.takeDamage(damage);
-                break;
-            case 'Poison':
-                result.poisonDamage = damage;
-                this.currentMonster.applyPoison(damage);
-                break;
-            case 'Fire':
-                result.fireDamage = this.currentMonster.takeDamage(damage);
-                break;
-            case 'Ice':
-                result.iceDamage = this.currentMonster.takeDamage(damage);
-                break;
-            case 'Lightning':
-                result.lightningDamage = this.currentMonster.takeDamage(damage);
-                break;
-            case 'Holy':
-                result.holyDamage = this.currentMonster.takeDamage(damage);
-                break;
-            case 'Dark':
-                result.darkDamage = this.currentMonster.takeDamage(damage);
-                break;
-            case 'Magic':
-                result.magicDamage = this.currentMonster.takeDamage(damage);
-                break;
+
+        if (damage_type === 'Dark' && this.currentMonster.hp === 0) {
+             result.darkDamage = this.currentMonster.maxHp; 
         }
+
+        // 몬스터 사망 체크는 이 함수 밖 (startPlayerTurn)에서 한번에 하는 게 좋음
         
         return result;
     }
@@ -295,16 +314,54 @@ class GameManager {
     }
 
     monsterAttack() { 
-        let totalPoisonDamage = 0;
+        let statusEffectResult = { 
+            poisonDamage: 0, 
+            fireDamage: 0, 
+            skipTurn: false 
+        }; 
         let shieldAbsorbed = 0;
+        let isFrozenSkip = false; // 💡 isFrozenSkip 플래그 초기화
+        let didTurnSkip = false;
+
+        const wasFrozen = this.currentMonster && this.currentMonster.statusEffects.some(e => e.type === 'Frozen');
 
         if (this.currentMonster && this.currentMonster.processStatusEffects) {
-            totalPoisonDamage = this.currentMonster.processStatusEffects();
+            // 💡 processStatusEffects의 결과를 statusEffectResult 객체에 저장
+            statusEffectResult = this.currentMonster.processStatusEffects();
+
+            // 💡 Frozen 상태였고 턴 스킵이 발생했다면 isFrozenSkip 플래그 설정
+            if (wasFrozen && statusEffectResult.skipTurn) {
+                isFrozenSkip = true;
+            }
 
             if(this.aliveChecked(this.currentMonster)) {
                 this.handleMonsterDefeat();
-                return { status: 'win', damageTaken: 0, poisonDamage: totalPoisonDamage, shieldAbsorbed: 0 }; 
+                // 💡 반환 객체에 damageReport와 skippedTurn 필드 추가
+                return { 
+                    status: 'win', 
+                    damageTaken: 0, 
+                    poisonDamage: statusEffectResult.poisonDamage + statusEffectResult.fireDamage, // 레거시 필드
+                    shieldAbsorbed: 0, 
+                    skippedTurn: statusEffectResult.skipTurn, 
+                    damageReport: { Poison: statusEffectResult.poisonDamage, Fire: statusEffectResult.fireDamage } // 💡 분리된 damageReport
+                };
             }
+        }
+
+        // 몬스터 턴 스킵 여부 체크 (Frozen, Shock 효과)
+        if (statusEffectResult.skipTurn) { 
+            didTurnSkip = true;
+            this.currentMonster.increaseAttack(); 
+            // 💡 반환 객체에 damageReport와 skippedTurn 필드 추가
+            return { 
+                status: 'continue', 
+                damageTaken: 0, 
+                poisonDamage: statusEffectResult.poisonDamage + statusEffectResult.fireDamage, 
+                shieldAbsorbed: 0, 
+                skippedTurn: didTurnSkip, 
+                isFrozenSkip: isFrozenSkip,
+                damageReport: { Poison: statusEffectResult.poisonDamage, Fire: statusEffectResult.fireDamage } // 💡 분리된 damageReport
+            };
         }
         
         const absorbedDamage = Math.min(this.currentMonster.atk, this.player.df);
@@ -317,10 +374,27 @@ class GameManager {
         
         if(this.player.hp <= 0) {
             this.gameState = 'GameOver';
-            return { status: 'lose', damageTaken: actualDamage, poisonDamage: totalPoisonDamage, shieldAbsorbed };
+            // 💡 반환 객체에 damageReport와 skippedTurn 필드 추가
+            return { 
+                status: 'lose', 
+                damageTaken: actualDamage, 
+                poisonDamage: statusEffectResult.poisonDamage + statusEffectResult.fireDamage, 
+                shieldAbsorbed, 
+                skippedTurn: didTurnSkip, 
+                damageReport: { Poison: statusEffectResult.poisonDamage, Fire: statusEffectResult.fireDamage } 
+            };
         }
 
-        return { status: 'continue', damageTaken: actualDamage, poisonDamage: totalPoisonDamage, shieldAbsorbed };
+        // 💡 반환 객체에 damageReport와 skippedTurn 필드 추가
+        return { 
+            status: 'continue', 
+            damageTaken: actualDamage, 
+            poisonDamage: statusEffectResult.poisonDamage + statusEffectResult.fireDamage, 
+            shieldAbsorbed, 
+            skippedTurn: didTurnSkip, 
+            isFrozenSkip: false,
+            damageReport: { Poison: statusEffectResult.poisonDamage, Fire: statusEffectResult.fireDamage } 
+        };
     }
 
     prepareNextCombat() {

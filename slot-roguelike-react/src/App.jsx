@@ -12,6 +12,7 @@ import ResourcePopups from './components/ResourcePopups';
 import Inventory from './components/Inventory';
 import { monsters, bosses } from './logic/data';
 import './styles/style.css';
+import ComboEffect from './components/ComboEffect';
 import Player from './logic/player';
 
 function App() {
@@ -41,13 +42,21 @@ function App() {
         showInventory,
         toggleInventory,
         getShopInventory,
-        handleRefreshShop
+        handleRefreshShop,
+        comboTriggered,
+        setComboTriggerd
     } = useGame();
 
     const [showStartScreen, setShowStartScreen] = useState(true);
     const [isGameOver, setIsGameOver] = useState(false);
 
     useEffect(() => {
+        if (comboTriggered) {
+            const timer = setTimeout(() => {
+                setComboTriggered(false); // 1.5초 후 콤보 상태 초기화
+            }, 1500); // CSS 애니메이션 시간과 일치
+            return () => clearTimeout(timer);
+        }
         if (gameState === 'GameOver' && !isGameOver) {
             setIsGameOver(true);
             
@@ -65,7 +74,7 @@ function App() {
                 }
             }, 800);
         }
-    }, [gameState, isGameOver]);
+    }, [gameState, isGameOver, comboTriggered, setComboTriggerd]);
 
     // 💥💥 뷰포트 높이 설정 로직 (App 컴포넌트 함수 내부) 💥💥
     useEffect(() => {
@@ -124,6 +133,8 @@ function App() {
                     setWeapons={setInitialWeapons}
                 />
             )}
+
+            <ComboEffect active={comboTriggered} />
 
             {gameState === 'Combat' && (
                 <>

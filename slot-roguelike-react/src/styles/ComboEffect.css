@@ -1,0 +1,54 @@
+/* components/ComboEffect.css */
+
+.combo-effect-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000; /* 다른 UI 위에 표시 */
+    pointer-events: none; /* 클릭 이벤트 방지 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fade-out 1.5s forwards; /* 1.5초 후 사라짐 */
+}
+
+.combo-text {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #ffd700; /* 황금색 */
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 5px rgba(255, 215, 0, 0.5);
+    animation: combo-appear 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; /* 튕기는 애니메이션 */
+}
+
+.combo-sparkle {
+    position: absolute;
+    background-color: #fff;
+    border-radius: 50%;
+    opacity: 0;
+    animation: sparkle-burst 1s forwards;
+}
+
+.sparkle-1 { animation-delay: 0.1s; width: 10px; height: 10px; }
+.sparkle-2 { animation-delay: 0.2s; width: 8px; height: 8px; }
+.sparkle-3 { animation-delay: 0.3s; width: 12px; height: 12px; }
+
+/* 애니메이션 키프레임 */
+@keyframes combo-appear {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fade-out {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+@keyframes sparkle-burst {
+    0% { opacity: 0; transform: scale(0); }
+    30% { opacity: 1; transform: scale(1.5); }
+    100% { opacity: 0; transform: scale(0); }
+}

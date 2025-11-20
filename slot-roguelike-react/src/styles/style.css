@@ -240,7 +240,7 @@ body::before {
     max-width: 800px;
     margin: 0 auto;
     overflow-y: scroll;
-    padding: 1.5rem 0 0 0;
+    padding: 1.5rem 0 1.5rem 0;
     
 }
 
@@ -433,7 +433,24 @@ body::before {
     margin-bottom: 10px;
     filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.5)); /* 몬스터 분위기에 맞는 그림자 */
     padding: 1rem;
+    transition: filter 0.3s ease-in-out; /* 필터 애니메이션 추가 */
     /* 위치 조정이 필요하다면 position: absolute 등을 사용 */
+}
+
+/* 몬스터가 얼었을 때 살짝 푸른 빛이 돌도록 필터 추가 */
+.monster-image.frozen-animation {
+    filter: brightness(1.1) contrast(1.1) saturate(1.2) hue-rotate(180deg);
+}
+
+/* 오버레이를 위한 간단한 애니메이션 (선택 사항) */
+ @keyframes ice-pulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 0.6; }
+    100% { opacity: 0.4; }
+}
+
+.frozen-overlay {
+    animation: ice-pulse 1.5s infinite alternate ease-in-out;
 }
 
 .monster-hp-bar {
