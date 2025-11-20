@@ -50,13 +50,13 @@ function Shop({
                         id="upgrade-slot-btn" 
                         className="btn btn-upgrade"
                         onClick={onUpgradeSlot}
-                        disabled={isSlotMaxed || player.gold < 5000}
+                        disabled={isSlotMaxed || player.gold < 500}
                         data-testid="button-upgrade-slot"
                     >
                         <div className="btn-icon">🎰</div>
                         <div className="btn-text">
                             <div>슬롯 개수 +1</div>
-                            <div className="btn-cost">{isSlotMaxed ? '(최대치)' : '5000 Gold'}</div>
+                            <div className="btn-cost">{isSlotMaxed ? '(최대치)' : '500 Gold'}</div>
                         </div>
                     </button>
                 </div>
@@ -134,7 +134,8 @@ function Shop({
                             if (!weapon) return null;
                             
                             const currentLevel = player.weaponUpgradeLevels[weaponId] || 0;
-                            const upgradeCost = 100 + (currentLevel * 75);
+                            const baseUpgradeCost = weapon.cost;
+                            const upgradeCost = baseUpgradeCost + (currentLevel * 75);
                             const sellPrice = Math.floor(weapon.cost * 0.5);
                             
                             return (

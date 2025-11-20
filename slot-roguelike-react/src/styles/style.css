@@ -231,6 +231,27 @@ body::before {
     flex-wrap: wrap;
     max-width: 800px;
     margin: 0 auto;
+    overflow-x: scroll;
+    overflow-x: hidden;
+    padding: 1rem 0 0 0;
+    
+}
+
+.weapon-selection-horizontal::-webkit-scrollbar {
+    height: 8px;
+}
+
+.weapon-selection-horizontal::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.weapon-selection-horizontal::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.4);
+    border-radius: 4px;
+}
+
+.weapon-selection-horizontal::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.6);
 }
 
 .weapon-card {
@@ -295,7 +316,7 @@ body::before {
 }
 
 .weapon-stats {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: #c4b5fd;
     margin: 0;
 }
@@ -348,6 +369,10 @@ body::before {
 
     .weapon-name {
         font-size: 0.95rem;
+    }
+
+    .weapon-stats {
+        font-size: 0.7rem;
     }
 
     .btn-start-combat {
@@ -1400,4 +1425,34 @@ body::before {
         padding: 0.8rem 2rem;
         font-size: 1rem;
     }
+}
+
+
+.ending-content {
+    background: rgba(139, 92, 246, 0.1);
+    border: 2px solid #8b5cf6;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.ending-stats {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+}
+
+.ending-stats p {
+    font-size: 1.2rem;
+    color: #fbbf24;
+    margin: 0.5rem 0;
+}
+
+.ending-message {
+    font-size: 1.3rem;
+    color: #fbbf24;
+    font-weight: bold;
+    margin-top: 1rem;
 }

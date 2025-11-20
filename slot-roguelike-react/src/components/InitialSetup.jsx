@@ -23,7 +23,17 @@ function InitialSetup({ allEquipment, setWeapons }) {
         setWeapons(selectedWeapons);
     };
 
-    const availableWeapons = allEquipment.filter(item => item.cost === 0);
+    // 기본 무기(requiredLevel: 0) 또는 해금된 무기만 표시
+    const availableWeapons = allEquipment.filter(item => 
+        item.requiredLevel === 0 || item.unlocked === true
+    );
+    
+    // console.log('Available weapons for selection:', availableWeapons.map(w => ({
+    //     id: w.id,
+    //     name: w.name,
+    //     unlocked: w.unlocked,
+    //     requiredLevel: w.requiredLevel
+    // })));
 
     return (
         <div className="initial-setup-container">
@@ -51,7 +61,18 @@ function InitialSetup({ allEquipment, setWeapons }) {
                         </div>
                         
                         <div className="weapon-info">
-                            <h3 className="weapon-name">{weapon.name}</h3>
+                            <h3 className="weapon-name">
+                                {weapon.name}
+                                {weapon.unlocked && weapon.requiredLevel > 0 && (
+                                    <span style={{ 
+                                        marginLeft: '0.5rem', 
+                                        fontSize: '0.8rem', 
+                                        color: '#fbbf24' 
+                                    }}>
+                                        🔓
+                                    </span>
+                                )}
+                            </h3>
                             <p className="weapon-stats">
                                 {weapon.type}: {weapon.base_value}
                                 {weapon.damage_type && ` (${weapon.damage_type})`}

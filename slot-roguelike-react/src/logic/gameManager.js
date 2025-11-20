@@ -2,6 +2,7 @@ import Player from './player.js';
 import Monster from './monster.js';
 import Item from './item.js';
 import SlotMachine from './slotMachine.js';
+import { equipmentBackUp } from './data-backup.js';
 import { monsters, equipmentMap, equipment, bosses } from './data.js';
 
 class GameManager {
@@ -14,36 +15,128 @@ class GameManager {
         this.stage = 1;
         this.gameState = 'InitialSetup'; 
         this.shopInventory = [];
+        this.unlockedWeapons = [];
         
         this.loadProgress();
+        // this.restartGame();
     }
     
     loadProgress() {
         const savedLevel = localStorage.getItem('playerLevel');
         const savedExp = localStorage.getItem('playerExp');
-        
+        const unlockedWeapons = localStorage.getItem('unlockedWeapons');
+        this.unlockedWeapons = unlockedWeapons ? JSON.parse(unlockedWeapons) : [];
         this.playerLevel = savedLevel ? parseInt(savedLevel) : 0;
         this.playerExp = savedExp ? parseInt(savedExp) : 0;
-        
-        this.unlockWeaponsByLevel();
-    }
-    
-    saveProgress() {
-        localStorage.setItem('playerLevel', this.playerLevel.toString());
-        localStorage.setItem('playerExp', this.playerExp.toString());
-    }
-    
-    unlockWeaponsByLevel() {
+
+        // 모든 장비를 먼저 잠금 상태로 초기화
         this.allEquipment.forEach(item => {
-            if (item.requiredLevel <= this.playerLevel) {
+            item.unlocked = false;
+        });
+
+        // 기본 무기 (requiredLevel === 0)는 항상 해금
+        this.allEquipment.forEach(item => {
+            if (item.requiredLevel === 0) {
                 item.unlocked = true;
             }
         });
+
+        // 해금된 무기만 unlocked = true로 설정
+        this.unlockedWeapons.forEach(unlockedId => {
+            const weapon = this.allEquipment.find(item => item.id === unlockedId);
+            if(weapon) {
+                weapon.unlocked = true;
+            }
+        });
+        
+        console.log('Loaded progress - Level:', this.playerLevel, 'EXP:', this.playerExp);
+        console.log('Unlocked weapons:', this.allEquipment.filter(w => w.unlocked).map(w => w.name));
+    }
+    
+    saveProgress() {
+        if(localStorage !== undefined) {
+            localStorage.setItem('playerLevel', this.playerLevel.toString());
+            localStorage.setItem('playerExp', this.playerExp.toString());
+            localStorage.setItem('unlockedWeapons', JSON.stringify(this.unlockedWeapons));
+        }
+        console.log("Saving Level:", this.playerLevel, "EXP:", this.playerExp, "Unlocked:", this.unlockedWeapons);
+    }
+
+    restartGame() {
+        this.player = new Player();
+        this.currentMonster = null;
+        this.stage = 1;
+        this.gameState = 'InitialSetup';
+        this.shopInventory = [];
+        
+        // 재시작 시 allEquipment를 원본으로 완전히 초기화합니다.
+        equipment.forEach(item => {
+            if(item.requiredLevel !== 0)
+            item.unlocked = false;
+        });
+
+        this.playerLevel = 0;
+        this.playerExp = 0;
+        this.unlockedWeapons = [];
+        
+        this.unlockWeaponsByLevel();
+
+        this.saveProgress();
+    }
+    
+    unlockWeaponsByLevel() {
+        // console.log("Unlocking weapons for level:", this.playerLevel);
+        const unlockedWeapons = this.unlockRandomWeapon(this.playerLevel);
+        console.log(this.playerLevel + "레벨 달성! 무기 해금 시도 완료.");
+        // 레벨업 시 해금된 무기 알림
+        if (unlockedWeapons && unlockedWeapons.length > 0) {
+            const weaponNames = unlockedWeapons.map(w => w.name).join(', ');
+            console.log(`🎉 레벨 ${this.playerLevel} 달성! 해금된 무기: ${weaponNames}`);
+        }
+        
+        this.saveProgress();
+    }
+    
+    unlockRandomWeapon(level) {
+        if (!this.allEquipment) {
+            console.error("ERROR: No equipment data available.");
+            return;
+        }
+
+        // 현재 레벨에서 해금 가능한 무기들 (아직 해금되지 않은 것만)
+        const eligibleWeapons = this.allEquipment.filter(item => 
+            item.requiredLevel === level && !item.unlocked && item.cost > 0
+        );
+
+        console.log("Eligible weapons for level", level, ":", eligibleWeapons.map(w => w.name));
+
+        // 해금할 무기가 없으면 종료
+        if (eligibleWeapons.length === 0) {
+            console.log("No weapons to unlock at level", level);
+            return;
+        }
+
+        // 최대 2개까지 랜덤 선택
+        const weaponsToUnlock = Math.min(2, eligibleWeapons.length);
+        const shuffled = [...eligibleWeapons].sort(() => 0.5 - Math.random());
+        
+        for(let i = 0; i < weaponsToUnlock; i++) {
+            const weapon = shuffled[i];
+            weapon.unlocked = true;
+            
+            // unlockedWeapons 배열에 추가 (중복 방지)
+            if (!this.unlockedWeapons.includes(weapon.id)) {
+                this.unlockedWeapons.push(weapon.id);
+            }
+            
+            console.log(`Unlocked: ${weapon.name} (Level ${level})`);
+        }
     }
     
     gainExperience(expAmount) {
         this.playerExp += expAmount;
         const newLevel = Math.floor(this.playerExp / 100);
+        console.log("Gained EXP:", expAmount, "Total EXP:", this.playerExp, "New Level:", newLevel);
         
         if (newLevel > this.playerLevel) {
             this.playerLevel = newLevel;
@@ -109,25 +202,51 @@ class GameManager {
             };
         }
         
-        const actionResult = this.item.processSlotResult(
-            [itemResult],
-            this.currentMonster,
-            this.player,
-            multiplier
-        );
-        
-        return { 
-            physicalDamage: actionResult.physicalDamage,
-            poisonDamage: actionResult.poisonDamage,
-            fireDamage: actionResult.fireDamage,
-            iceDamage: actionResult.iceDamage,
-            lightningDamage: actionResult.lightningDamage,
-            holyDamage: actionResult.holyDamage,
-            darkDamage: actionResult.darkDamage,
-            magicDamage: actionResult.magicDamage,
+        // Attack 타입일 경우, 각 속성별로 개별 처리
+        const damage = itemResult.base_value * multiplier;
+        const result = {
+            physicalDamage: 0,
+            poisonDamage: 0,
+            fireDamage: 0,
+            iceDamage: 0,
+            lightningDamage: 0,
+            holyDamage: 0,
+            darkDamage: 0,
+            magicDamage: 0,
             defenseGain: 0,
             goldGain: 0
         };
+        
+        // 속성별로 몬스터에게 데미지 적용
+        switch(itemResult.damage_type) {
+            case 'Physical':
+                result.physicalDamage = this.currentMonster.takeDamage(damage);
+                break;
+            case 'Poison':
+                result.poisonDamage = damage;
+                this.currentMonster.applyPoison(damage);
+                break;
+            case 'Fire':
+                result.fireDamage = this.currentMonster.takeDamage(damage);
+                break;
+            case 'Ice':
+                result.iceDamage = this.currentMonster.takeDamage(damage);
+                break;
+            case 'Lightning':
+                result.lightningDamage = this.currentMonster.takeDamage(damage);
+                break;
+            case 'Holy':
+                result.holyDamage = this.currentMonster.takeDamage(damage);
+                break;
+            case 'Dark':
+                result.darkDamage = this.currentMonster.takeDamage(damage);
+                break;
+            case 'Magic':
+                result.magicDamage = this.currentMonster.takeDamage(damage);
+                break;
+        }
+        
+        return result;
     }
 
     aliveChecked(monster) {
@@ -163,9 +282,14 @@ class GameManager {
         this.player.df = 0;
         
         this.stage++;
-        this.gameState = 'ShopPhase';
         
-        this.generateShopInventory();
+        // 스테이지 70 이상이면 엔딩
+        if (this.stage > 70) {
+            this.gameState = 'Ending';
+        } else {
+            this.gameState = 'ShopPhase';
+            this.generateShopInventory();
+        }
         
         this.currentMonster = null; 
     }
@@ -289,7 +413,7 @@ class GameManager {
         }
         
         const currentLevel = this.player.weaponUpgradeLevels[weaponId] || 0;
-        const baseUpgradeCost = 100;
+        const baseUpgradeCost = weapon.cost;
         const upgradeCost = baseUpgradeCost + (currentLevel * 75);
         
         if (this.player.gold < upgradeCost) {
@@ -298,8 +422,7 @@ class GameManager {
         
         this.player.gold -= upgradeCost;
         this.player.weaponUpgradeLevels[weaponId] = currentLevel + 1;
-        
-        const statIncrease = Math.ceil(weapon.base_value * 0.15);
+        const statIncrease = 2;
         weapon.base_value += statIncrease;
         
         return { 

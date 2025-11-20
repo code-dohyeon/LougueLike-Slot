@@ -189,6 +189,15 @@ function App() {
                     </button>
                 </div>
             )}
+
+            {gameState === 'Ending' && (
+                <Ending 
+                    stage={stage}
+                    playerState={playerState}
+                    onRestart={restartGame}
+                />
+            )}
+
         </div>
     );
 }

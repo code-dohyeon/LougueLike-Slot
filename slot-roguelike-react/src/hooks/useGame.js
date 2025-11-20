@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
-import GameManager from '../logic/gameManager'; 
+import GameManager from '../logic/gameManager';
+import { equipment } from '../logic/data'; 
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -215,8 +216,8 @@ export const useGame = () => {
     };
 
     const upgradeSlotCount = () => {
-        if (game.player.slotCount < 5 && game.player.gold >= 5000) {
-            game.player.gold -= 5000;
+        if (game.player.slotCount < 5 && game.player.gold >= 500) {
+            game.player.gold -= 500;
             game.player.slotCount++;
 
             alert(`슬롯 개수가 ${game.player.slotCount}개로 증가했습니다!`);
