@@ -239,9 +239,8 @@ body::before {
     flex-wrap: wrap;
     max-width: 800px;
     margin: 0 auto;
-    overflow-x: scroll;
-    overflow-x: hidden;
-    padding: 1rem 0 0 0;
+    overflow-y: scroll;
+    padding: 1.5rem 0 0 0;
     
 }
 
