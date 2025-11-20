@@ -19,7 +19,7 @@ import goblinKingImg from '../assets/image/monster/goblin_king.png';
 import skeletonLordImg from '../assets/image/monster/skeleton_lord.png';
 import orcWarlordImg from '../assets/image/monster/orc_warlord.png';
 import demonPrinceImg from '../assets/image/monster/demon_prince.png';
-import ancientDragonImg from '../assets/image/monster/ancient_dragon.png';
+import ancientDragonImg from '../assets/image/monster/ancient_dragon.pngll';
 import phoenixQueenImg from '../assets/image/monster/phoenix_queen.png';
 import darkEmperorImg from '../assets/image/monster/dark_emperor.png';
 
