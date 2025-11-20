@@ -7,7 +7,7 @@ function MonsterStatus({ monster, monsterImage, damagePopups }) {
     const displayHp = Math.max(0, Math.floor(monster.hp));
     const currentMonsterImage = monsterImage.find(m => m.type === monster.type) || {};
     
-    console.log(currentMonsterImage);
+    // console.log(currentMonsterImage);
 
     return (
         <div className="game-status combat-element" style={{ position: 'relative' }} data-testid="monster-status">

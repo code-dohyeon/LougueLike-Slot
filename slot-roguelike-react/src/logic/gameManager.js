@@ -49,8 +49,8 @@ class GameManager {
             }
         });
         
-        console.log('Loaded progress - Level:', this.playerLevel, 'EXP:', this.playerExp);
-        console.log('Unlocked weapons:', this.allEquipment.filter(w => w.unlocked).map(w => w.name));
+        // console.log('Loaded progress - Level:', this.playerLevel, 'EXP:', this.playerExp);
+        // console.log('Unlocked weapons:', this.allEquipment.filter(w => w.unlocked).map(w => w.name));
     }
     
     saveProgress() {
@@ -59,7 +59,7 @@ class GameManager {
             localStorage.setItem('playerExp', this.playerExp.toString());
             localStorage.setItem('unlockedWeapons', JSON.stringify(this.unlockedWeapons));
         }
-        console.log("Saving Level:", this.playerLevel, "EXP:", this.playerExp, "Unlocked:", this.unlockedWeapons);
+        // console.log("Saving Level:", this.playerLevel, "EXP:", this.playerExp, "Unlocked:", this.unlockedWeapons);
     }
 
     restartGame() {
@@ -108,11 +108,11 @@ class GameManager {
             item.requiredLevel === level && !item.unlocked && item.cost > 0
         );
 
-        console.log("Eligible weapons for level", level, ":", eligibleWeapons.map(w => w.name));
+        // console.log("Eligible weapons for level", level, ":", eligibleWeapons.map(w => w.name));
 
         // 해금할 무기가 없으면 종료
         if (eligibleWeapons.length === 0) {
-            console.log("No weapons to unlock at level", level);
+            // console.log("No weapons to unlock at level", level);
             return;
         }
 
@@ -129,14 +129,14 @@ class GameManager {
                 this.unlockedWeapons.push(weapon.id);
             }
             
-            console.log(`Unlocked: ${weapon.name} (Level ${level})`);
+            // console.log(`Unlocked: ${weapon.name} (Level ${level})`);
         }
     }
     
     gainExperience(expAmount) {
         this.playerExp += expAmount;
         const newLevel = Math.floor(this.playerExp / 100);
-        console.log("Gained EXP:", expAmount, "Total EXP:", this.playerExp, "New Level:", newLevel);
+        // console.log("Gained EXP:", expAmount, "Total EXP:", this.playerExp, "New Level:", newLevel);
         
         if (newLevel > this.playerLevel) {
             this.playerLevel = newLevel;

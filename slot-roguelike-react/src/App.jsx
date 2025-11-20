@@ -12,6 +12,7 @@ import ResourcePopups from './components/ResourcePopups';
 import Inventory from './components/Inventory';
 import { monsters, bosses } from './logic/data';
 import './styles/style.css';
+import Player from './logic/player';
 
 function App() {
     const {
@@ -147,6 +148,7 @@ function App() {
                                 slotResults={slotResults}
                                 isSpinning={isSpinning}
                                 currentlyProcessingSlotIndex={currentlyProcessingSlotIndex}
+                                currentEquipment={playerState.equippedWeapons}
                             />
 
                             <SpinButton 
