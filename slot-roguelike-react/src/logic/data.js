@@ -60,7 +60,7 @@ import diamondImg from '../assets/image/equipment/diamond.png';
 
 export const equipment = [
     // 기본 무기 (무료)
-    { id: 'SWD_01', name: '나무 검', type: 'Attack', base_value: 10000, damage_type: 'Physical', cost: 0, unlocked: true, requiredLevel: 0, src: woodSwordImg }, 
+    { id: 'SWD_01', name: '나무 검', type: 'Attack', base_value: 10, damage_type: 'Physical', cost: 0, unlocked: true, requiredLevel: 0, src: woodSwordImg }, 
     { id: 'SHD_01', name: '나무 방패', type: 'Defense', base_value: 4, target: 'Player', cost: 0, unlocked: true, requiredLevel: 0, src: woodShieldImg }, 
     { id: 'RSC_01', name: '코인', type: 'Resource', base_value: 12, target: 'Player', cost: 0, unlocked: true, requiredLevel: 0, src: coinImg }, 
     
