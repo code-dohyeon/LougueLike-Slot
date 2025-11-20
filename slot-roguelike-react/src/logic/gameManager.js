@@ -91,7 +91,7 @@ class GameManager {
         // 레벨업 시 해금된 무기 알림
         if (unlockedWeapons && unlockedWeapons.length > 0) {
             const weaponNames = unlockedWeapons.map(w => w.name).join(', ');
-            console.log(`🎉 레벨 ${this.playerLevel} 달성! 해금된 무기: ${weaponNames}`);
+            alert(`🎉 레벨 ${this.playerLevel} 달성! 해금된 무기: ${weaponNames}`);
         }
         
         this.saveProgress();

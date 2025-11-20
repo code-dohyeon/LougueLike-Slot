@@ -90,9 +90,7 @@ function Shop({
                             <div key={item.id} className="item-card" data-testid={`shop-item-${item.id}`}>
                                 <div className="item-body">
                                     <div className="item-icon">
-                                        {item.type === 'Attack' && '⚔️'}
-                                        {item.type === 'Defense' && '🛡️'}
-                                        {item.type === 'Resource' && '💰'}
+                                        <img src={item.src} alt={item.name} className='shop-weapon-icon' />
                                     </div>
                                     
                                     <h4 className="item-name">{item.name}</h4>
@@ -142,9 +140,7 @@ function Shop({
                                 <div key={weaponId} className="item-card" data-testid={`equipped-weapon-${weaponId}`}>
                                     <div className="item-body">
                                         <div className="item-icon">
-                                            {weapon.type === 'Attack' && '⚔️'}
-                                            {weapon.type === 'Defense' && '🛡️'}
-                                            {weapon.type === 'Resource' && '💰'}
+                                            <img src={weapon.src} alt={weapon.name} className="shop-weapon-icon" />
                                         </div>
                                         
                                         <h4 className="item-name">{weapon.name} Lv.{currentLevel}</h4>

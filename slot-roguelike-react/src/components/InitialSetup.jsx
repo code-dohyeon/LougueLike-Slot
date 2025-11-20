@@ -55,9 +55,7 @@ function InitialSetup({ allEquipment, setWeapons }) {
                         )}
                         
                         <div className="weapon-icon-large">
-                            {weapon.type === 'Attack' && '⚔️'}
-                            {weapon.type === 'Defense' && '🛡️'}
-                            {weapon.type === 'Resource' && '💰'}
+                            <img src={weapon.src} alt={weapon.name} className='initial-weapon-icon' />
                         </div>
                         
                         <div className="weapon-info">

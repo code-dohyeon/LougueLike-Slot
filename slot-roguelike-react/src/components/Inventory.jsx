@@ -42,9 +42,7 @@ function Inventory({ player, shopItems, isOpen, onClose }) {
                             return (
                                 <div key={weaponId} className="inventory-item" data-testid={`inv-weapon-${weaponId}`}>
                                     <div className="inv-item-icon">
-                                        {weapon.type === 'Attack' && '⚔️'}
-                                        {weapon.type === 'Defense' && '🛡️'}
-                                        {weapon.type === 'Resource' && '💰'}
+                                        <img src={weapon.src} alt={weapon.name} className="inventory_weapon" />
                                     </div>
                                     <div className="inv-item-info">
                                         <div className="inv-item-name">{weapon.name}</div>

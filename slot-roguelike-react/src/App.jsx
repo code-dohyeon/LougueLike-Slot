@@ -10,6 +10,7 @@ import Shop from './components/Shop';
 import DamagePopups from './components/DamagePopups';
 import ResourcePopups from './components/ResourcePopups';
 import Inventory from './components/Inventory';
+import { monsters, bosses } from './logic/data';
 import './styles/style.css';
 
 function App() {
@@ -129,6 +130,7 @@ function App() {
                         <div style={{ position: 'relative' }}>
                             <MonsterStatus 
                                 monster={monsterState} 
+                                monsterImage={[...monsters, ...bosses]}
                                 damagePopups={monsterDamagePopups}
                             />
                         </div>

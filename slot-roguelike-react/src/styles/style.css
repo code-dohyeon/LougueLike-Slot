@@ -208,6 +208,14 @@ body::before {
     height: 100%;
 }
 
+.initial-weapon-icon {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+    padding: 1rem;
+}
+
 .setup-title {
     font-size: 2rem;
     font-weight: 900;
@@ -391,7 +399,7 @@ body::before {
     min-height: 50vh;
     width: 100%;
     margin: 0 auto;
-    padding: 20% 0 0 0;
+    padding: 10% 0 0 0;
 }
 
 .game-status {
@@ -411,6 +419,22 @@ body::before {
     margin-bottom: 0.75rem;
     color: #fca5a5;
     text-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
+}
+
+.monster-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.monster-image {
+    height: 180px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.5)); /* 몬스터 분위기에 맞는 그림자 */
+    padding: 1rem;
+    /* 위치 조정이 필요하다면 position: absolute 등을 사용 */
 }
 
 .monster-hp-bar {
@@ -534,6 +558,12 @@ body::before {
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.3s ease;
+}
+
+.slot-icon {
+    width: 100%;
+    height: 100%;
+    padding: 0.5rem;
 }
 
 .slot-reel-container:hover {
@@ -693,6 +723,16 @@ body::before {
     color: #f9a8d4;
     margin-bottom: 0.75rem;
 }
+
+.shop-weapon-icon {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+    margin-bottom: 0.5rem;
+    padding: .5rem;
+}
+
 
 .gold-highlight {
     font-weight: 900;
@@ -878,7 +918,9 @@ body::before {
 }
 
 .item-icon {
-    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
 
@@ -1155,6 +1197,11 @@ body::before {
     font-weight: 900;
     color: #fbbf24;
     margin: 0;
+}
+
+.inventory_weapon {
+    width: 80px;
+    padding: .5rem;
 }
 
 .inventory-close {
