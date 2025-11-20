@@ -15,9 +15,11 @@
 }
 
 .combo-text {
-    font-size: 4rem;
+    font-size: 2rem;
     font-weight: bold;
     color: #ffd700; /* 황금색 */
+    padding-top: 4rem;
+    text-align: center;
     text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 5px rgba(255, 215, 0, 0.5);
     animation: combo-appear 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; /* 튕기는 애니메이션 */
 }

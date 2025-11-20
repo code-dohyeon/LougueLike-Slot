@@ -58,6 +58,13 @@ export const useGame = () => {
             setIsSpinning(false);
             await delay(RESULT_SHOW_DELAY);
 
+            if (game.checkCombo(results)) {
+                setComboTriggered(true); // 콤보 성공!
+            }
+
+            await delay(ACTION_DELAY);
+
+
             for (let i = 0; i < results.length; i++) {
                 setCurrentlyProcessingSlotIndex(i);
                 
@@ -126,18 +133,11 @@ export const useGame = () => {
                 setMonsterDamagePopups([]);
                 setResourcePopups([]);
                 // 💡 콤보 체크 로직 추가: 마지막 슬롯 처리 후
-                if (i === results.length - 1) {
-                    // game.js에 콤보 체크 로직이 있다고 가정
-                    // 예시: game.checkCombo(results)가 콤보 성공 여부를 bool 값으로 반환한다고 가정
-                    if (game.checkCombo(results)) { // 💥 gameManager.js에 checkCombo 함수가 필요합니다.
-                        setComboTriggered(true); // 콤보 성공!
-                    }
-                }
+                
             }
             
             setCurrentlyProcessingSlotIndex(-1);
-            
-            
+        
 
             if (game.gameState === 'Combat') {
                 await delay(MONSTER_TURN_DELAY);
@@ -387,5 +387,7 @@ export const useGame = () => {
         resourcePopups,
         showInventory,
         toggleInventory,
+        comboTriggered,
+        setComboTriggered,
     };
 };

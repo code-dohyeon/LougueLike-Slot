@@ -44,7 +44,7 @@ function App() {
         getShopInventory,
         handleRefreshShop,
         comboTriggered,
-        setComboTriggerd
+        setComboTriggered
     } = useGame();
 
     const [showStartScreen, setShowStartScreen] = useState(true);
@@ -74,7 +74,7 @@ function App() {
                 }
             }, 800);
         }
-    }, [gameState, isGameOver, comboTriggered, setComboTriggerd]);
+    }, [gameState, isGameOver, comboTriggered, setComboTriggered]);
 
     // 💥💥 뷰포트 높이 설정 로직 (App 컴포넌트 함수 내부) 💥💥
     useEffect(() => {

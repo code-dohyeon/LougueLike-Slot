@@ -186,8 +186,8 @@ class GameManager {
         }
         // 마지막 3개 슬롯의 타입이 모두 같은지 확인 (예: Attack, Attack, Attack)
         const lastThree = slotResults.slice(-3);
-        const firstType = lastThree[0].type;
-        return lastThree.every(slot => slot.type === firstType);
+        const firstType = lastThree[0].id;
+        return lastThree.every(slot => slot.id === firstType);
     }
 
     processSingleSlotResult(itemResult, multiplier) {

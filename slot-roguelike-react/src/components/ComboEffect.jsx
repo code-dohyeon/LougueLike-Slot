@@ -7,7 +7,7 @@ const ComboEffect = ({ active }) => {
 
     return (
         <div className="combo-effect-container">
-            <div className="combo-text">COMBO!</div>
+            <div className="combo-text">Chritical!(X3)</div>
             <div className="combo-sparkle sparkle-1"></div>
             <div className="combo-sparkle sparkle-2"></div>
             <div className="combo-sparkle sparkle-3"></div>
