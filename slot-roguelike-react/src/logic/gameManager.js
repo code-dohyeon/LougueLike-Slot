@@ -181,13 +181,29 @@ class GameManager {
     }
 
     checkCombo(slotResults) {
-        if (slotResults.length < 3) {
-            return false;
+        const minComboLength = 3; // 콤보를 위한 최소 길이
+
+        if (slotResults.length < minComboLength) {
+            return false; // 전체 슬롯 개수가 3개 미만이면 콤보 불가
         }
-        // 마지막 3개 슬롯의 타입이 모두 같은지 확인 (예: Attack, Attack, Attack)
-        const lastThree = slotResults.slice(-3);
-        const firstType = lastThree[0].id;
-        return lastThree.every(slot => slot.id === firstType);
+
+        // 배열을 처음(인덱스 0)부터 순회하며 3개 연속으로 같은 ID가 있는지 확인
+        // 순회는 (전체 길이 - 콤보 길이)까지만 하면 돼 (그래야 i+2까지 접근 가능)
+        for (let i = 0; i <= slotResults.length - minComboLength; i++) {
+            const item1Id = slotResults[i].id;
+            const item2Id = slotResults[i + 1].id; // 다음 칸
+            const item3Id = slotResults[i + 2].id; // 그 다음 칸
+
+            // 3개의 ID가 모두 같으면 콤보 성공
+            if (item1Id === item2Id && item2Id === item3Id) {
+                // 이 로직 덕분에 [A, B, B, B, C] 같은 경우,
+                // i=1 일 때 [B, B, B]를 찾고 바로 true를 반환하게 돼.
+                return true;
+            }
+        }
+
+        // 모든 구간을 체크했지만 콤보를 찾지 못했으면 false 반환
+        return false;
     }
 
     processSingleSlotResult(itemResult, multiplier) {
@@ -322,8 +338,10 @@ class GameManager {
         let shieldAbsorbed = 0;
         let isFrozenSkip = false; // 💡 isFrozenSkip 플래그 초기화
         let didTurnSkip = false;
+        let isElectricSkip = false;
 
         const wasFrozen = this.currentMonster && this.currentMonster.statusEffects.some(e => e.type === 'Frozen');
+        const wasElectric = this.currentMonster && this.currentMonster.statusEffects.some(e => e.type === 'Electric');
 
         if (this.currentMonster && this.currentMonster.processStatusEffects) {
             // 💡 processStatusEffects의 결과를 statusEffectResult 객체에 저장
@@ -332,6 +350,10 @@ class GameManager {
             // 💡 Frozen 상태였고 턴 스킵이 발생했다면 isFrozenSkip 플래그 설정
             if (wasFrozen && statusEffectResult.skipTurn) {
                 isFrozenSkip = true;
+            }
+
+            if (wasElectric && statusEffectResult.skipTurn) {
+                isElectricSkip = true;
             }
 
             if(this.aliveChecked(this.currentMonster)) {
@@ -393,6 +415,7 @@ class GameManager {
             shieldAbsorbed, 
             skippedTurn: didTurnSkip, 
             isFrozenSkip: false,
+            isElectricSkip: isElectricSkip,
             damageReport: { Poison: statusEffectResult.poisonDamage, Fire: statusEffectResult.fireDamage } 
         };
     }

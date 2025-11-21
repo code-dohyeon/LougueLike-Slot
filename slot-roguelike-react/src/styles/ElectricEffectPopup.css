@@ -1,0 +1,64 @@
+/* src/components/ElectricEffectPopup.css */
+.electric-effect-popup {
+    position: absolute; /* App.jsx의 부모 요소에 relative 필요 */
+    /* top, left는 JS에서 position prop으로 설정 */
+    color: #fff;
+    font-size: 2.5em; /* 텍스트 크기 */
+    font-weight: bold;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff; /* 네온 효과 */
+    animation: electricPopIn 0.3s ease-out forwards,
+               electricPulse 0.1s infinite alternate 0.3s, /* 번개 깜빡임 */
+               electricFadeOut 0.7s ease-in 0.3s forwards; /* 서서히 사라짐 */
+    opacity: 0;
+    pointer-events: none; /* 클릭 방지 */
+}
+
+@keyframes electricPopIn {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    80% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+@keyframes electricPulse {
+    0% { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff; }
+    50% { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff; } /* 잠깐 밝게 */
+    100% { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff; }
+}
+
+@keyframes electricFadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -70%) scale(0.8); } /* 위로 살짝 이동하며 사라짐 */
+}
+
+/* 스파크 효과 (선택 사항, 더 복잡한 애니메이션 가능) */
+.spark {
+    position: absolute;
+    background-color: #00ffff; /* 전기 색상 */
+    border-radius: 50%;
+    opacity: 0;
+    animation: sparkEffect 0.5s ease-out forwards;
+}
+
+.spark-1 { width: 5px; height: 5px; left: 10%; top: 0%; animation-delay: 0.1s; }
+.spark-2 { width: 7px; height: 7px; right: 5%; bottom: 10%; animation-delay: 0.2s; }
+.spark-3 { width: 4px; height: 4px; left: 20%; bottom: 5%; animation-delay: 0.3s; }
+
+@keyframes sparkEffect {
+    0% { transform: scale(0) translate(0, 0); opacity: 1; }
+    100% { transform: scale(1) translate(calc(var(--rand-x) * 1px), calc(var(--rand-y) * 1px)); opacity: 0; }
+}
+/* 스파크의 무작위 위치를 위해 JS에서 --rand-x, --rand-y CSS 변수 설정 가능 */
+
+/* ELECTRIC 텍스트 자체에 적용되는 효과 */
+.electric-text {
+    display: inline-block; /* transform을 적용하기 위함 */
+    animation: electricShake 0.1s infinite alternate; /* 텍스트 떨림 */
+}
+
+@keyframes electricShake {
+    0% { transform: translateX(0px) translateY(0px); }
+    25% { transform: translateX(1px) translateY(-1px); }
+    50% { transform: translateX(-1px) translateY(1px); }
+    75% { transform: translateX(1px) translateY(1px); }
+    100% { transform: translateX(-1px) translateY(-1px); }
+}

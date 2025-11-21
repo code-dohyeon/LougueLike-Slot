@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, use } from 'react';
 import GameManager from '../logic/gameManager';
 import { equipment } from '../logic/data'; 
 
@@ -27,6 +27,7 @@ export const useGame = () => {
     const [playerDamagePopups, setPlayerDamagePopups] = useState([]);
     const [resourcePopups, setResourcePopups] = useState([]);
     const [showInventory, setShowInventory] = useState(false);
+    const [electricEffectTriggered, setElectricEffectTriggered] = useState(false);
 // 💡 콤보 이펙트 상태 추가
     const [comboTriggered, setComboTriggered] = useState(false);
 
@@ -100,6 +101,11 @@ export const useGame = () => {
                     if (result.magicDamage > 0) {
                         popups.push({ id: Date.now() + Math.random() + 0.7, value: Math.floor(result.magicDamage), type: 'magic' });
                     }
+
+                    // 💡 [새로 추가] 전기 속성 공격 시 팝업 상태 설정 (Lightning damage_type 확인)
+                    if (itemResult.damage_type === 'Lightning') {
+                        setElectricEffectTriggered(true);
+                    }
                     
                     if (popups.length > 0) {
                         setMonsterDamagePopups(popups);
@@ -150,6 +156,7 @@ export const useGame = () => {
                     shieldAbsorbed, 
                     skippedTurn, 
                     isFrozenSkip,
+                    isElectricSkip,
                     damageReport = { Poison: 0, Fire: 0 } // <-- 이 부분을 추가/수정
                 } = game.monsterAttack();
                 
@@ -182,6 +189,11 @@ export const useGame = () => {
                         syncGameState();
                         setIsBlocked(false);
                         return;
+                    }
+
+                    // 💡 [새로 추가] 전기 속성 스킵 이펙트 트리거
+                    if (isElectricSkip) {
+                        setElectricEffectTriggered(true);
                     }
                     
                     // 턴 스킵 시에는 물리 공격을 건너뛰고 다음 턴으로
@@ -246,15 +258,6 @@ export const useGame = () => {
         } finally {
             setIsSpinning(false);
             setIsBlocked(false);
-        }
-
-        return {
-            comboTriggered,
-            setComboTriggered,
-            monsterDamagePopups,
-            playerDamagePopups,
-            resourcePopups,
-            currentlyProcessingSlotIndex,
         }
     }, [gameState, isSpinning, isBlocked, game]);
 
@@ -389,5 +392,7 @@ export const useGame = () => {
         toggleInventory,
         comboTriggered,
         setComboTriggered,
+        electricEffectTriggered,
+        setElectricEffectTriggered
     };
 };

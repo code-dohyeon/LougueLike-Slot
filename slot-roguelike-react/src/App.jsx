@@ -13,6 +13,7 @@ import Inventory from './components/Inventory';
 import { monsters, bosses } from './logic/data';
 import './styles/style.css';
 import ComboEffect from './components/ComboEffect';
+import ElectricEffectPopup from './components/ElectricEffectPopup';
 import Player from './logic/player';
 
 function App() {
@@ -44,7 +45,9 @@ function App() {
         getShopInventory,
         handleRefreshShop,
         comboTriggered,
-        setComboTriggered
+        setComboTriggered,
+        electricEffectTriggered,
+        setElectricEffectTriggered,
     } = useGame();
 
     const [showStartScreen, setShowStartScreen] = useState(true);
@@ -57,6 +60,15 @@ function App() {
             }, 1500); // CSS 애니메이션 시간과 일치
             return () => clearTimeout(timer);
         }
+
+        // 💡 [새로 추가] 전기 속성 팝업 타이머 관리 (1초 후 사라지게)
+        if (electricEffectTriggered) {
+            const timer = setTimeout(() => {
+                setElectricEffectTriggered(false);
+            }, 1000); 
+            return () => clearTimeout(timer);
+        }
+        
         if (gameState === 'GameOver' && !isGameOver) {
             setIsGameOver(true);
             
