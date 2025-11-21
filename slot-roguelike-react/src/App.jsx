@@ -68,7 +68,7 @@ function App() {
             }, 1000); 
             return () => clearTimeout(timer);
         }
-        
+
         if (gameState === 'GameOver' && !isGameOver) {
             setIsGameOver(true);
             
@@ -147,6 +147,7 @@ function App() {
             )}
 
             <ComboEffect active={comboTriggered} />
+            <ElectricEffectPopup active={electricEffectTriggered} position={{ x: 50, y: 35 }} /> {/* 💡 [추가] 렌더링 확인 */}
 
             {gameState === 'Combat' && (
                 <>
