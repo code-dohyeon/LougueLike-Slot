@@ -84,26 +84,26 @@ export const equipment = [
     { id: 'RSC_04', name: '보석', type: 'Resource', base_value: 70, target: 'Player', cost: 500, unlocked: false, requiredLevel: 4, src: gemImg },
     
     // 레벨 6 해금 무기 (스테이지 31-40)
-    { id: 'SWD_06', name: '신성 검', type: 'Attack', base_value: 38, damage_type: 'Holy', cost: 800, unlocked: false, requiredLevel: 8, src: hollySwordImg },
-    { id: 'DGR_02', name: '암흑 단검', type: 'Attack', base_value: 42, damage_type: 'Dark', cost: 900, unlocked: false, requiredLevel: 8, src: darkDaggerImg },
-    { id: 'BOW_02', name: '엘프의 활', type: 'Attack', base_value: 35, damage_type: 'Magic', cost: 700, unlocked: false, requiredLevel: 8, src: elfArrowImg },
-    { id: 'SHD_05', name: '신성 방패', type: 'Defense', base_value: 20, target: 'Player', cost: 900, unlocked: false, requiredLevel: 8, src: holyShieldImg },
-    { id: 'RSC_05', name: '루비', type: 'Resource', base_value: 130, target: 'Player', cost: 850, unlocked: false, requiredLevel: 8, src: rubyImg },
+    { id: 'SWD_06', name: '신성 검', type: 'Attack', base_value: 38, damage_type: 'Holy', cost: 800, unlocked: false, requiredLevel: 9, src: hollySwordImg },
+    { id: 'DGR_02', name: '암흑 단검', type: 'Attack', base_value: 42, damage_type: 'Dark', cost: 900, unlocked: false, requiredLevel: 9, src: darkDaggerImg },
+    { id: 'BOW_02', name: '엘프의 활', type: 'Attack', base_value: 35, damage_type: 'Magic', cost: 700, unlocked: false, requiredLevel: 9, src: elfArrowImg },
+    { id: 'SHD_05', name: '신성 방패', type: 'Defense', base_value: 20, target: 'Player', cost: 900, unlocked: false, requiredLevel: 9, src: holyShieldImg },
+    { id: 'RSC_05', name: '루비', type: 'Resource', base_value: 130, target: 'Player', cost: 850, unlocked: false, requiredLevel: 9, src: rubyImg },
     
     // 레벨 7 해금 무기 (스테이지 41-50)
-    { id: 'HAM_01', name: '전쟁 망치', type: 'Attack', base_value: 48, damage_type: 'Physical', cost: 1100, unlocked: false, requiredLevel: 12, src: warHammerImg },
-    { id: 'STF_01', name: '마법 지팡이', type: 'Attack', base_value: 40, damage_type: 'Magic', cost: 900, unlocked: false, requiredLevel: 12, src: magicWandImg },
-    { id: 'STF_02', name: '달빛 지팡이', type: 'Attack', base_value: 52, damage_type: 'Magic', cost: 1250, unlocked: false, requiredLevel: 12, src: moonlightWandImg },
-    { id: 'SHD_06', name: '영웅의 방패', type: 'Defense', base_value: 25, target: 'Player', cost: 1200, unlocked: false, requiredLevel: 12, src: heroShieldImg },
-    { id: 'RSC_06', name: '다이아몬드', type: 'Resource', base_value: 170, target: 'Player', cost: 1400, unlocked: false, requiredLevel: 12, src: diamondImg },
+    { id: 'HAM_01', name: '전쟁 망치', type: 'Attack', base_value: 48, damage_type: 'Physical', cost: 1100, unlocked: false, requiredLevel: 15, src: warHammerImg },
+    { id: 'STF_01', name: '마법 지팡이', type: 'Attack', base_value: 40, damage_type: 'Magic', cost: 900, unlocked: false, requiredLevel: 15, src: magicWandImg },
+    { id: 'STF_02', name: '달빛 지팡이', type: 'Attack', base_value: 52, damage_type: 'Magic', cost: 1250, unlocked: false, requiredLevel: 15, src: moonlightWandImg },
+    { id: 'SHD_06', name: '영웅의 방패', type: 'Defense', base_value: 25, target: 'Player', cost: 1200, unlocked: false, requiredLevel: 15, src: heroShieldImg },
+    { id: 'RSC_06', name: '다이아몬드', type: 'Resource', base_value: 170, target: 'Player', cost: 1400, unlocked: false, requiredLevel: 15, src: diamondImg },
     
     // 레벨 9 해금 무기 (스테이지 51-60)
-    { id: 'SWD_07', name: '영웅의 검', type: 'Attack', base_value: 60, damage_type: 'Holy', cost: 1600, unlocked: false, requiredLevel: 20, src: heroSwordImg },
-    { id: 'SWD_08', name: '전설의 검', type: 'Attack', base_value: 75, damage_type: 'Physical', cost: 2200, unlocked: false, requiredLevel: 20, src: legendSwordImg },
-    { id: 'SHD_07', name: '전설의 방패', type: 'Defense', base_value: 32, target: 'Player', cost: 1900, unlocked: false, requiredLevel: 20, src: legendShieldImg },
-    { id: 'MSK_01', name: '전투 가면', type: 'Defense', base_value: 6, target: 'Player', cost: 300, unlocked: false, requiredLevel: 20, src: battleMaskImg },
-    { id: 'MSK_02', name: '마법 가면', type: 'Defense', base_value: 15, target: 'Player', cost: 750, unlocked: false, requiredLevel: 20, src: magicMaskImg },
-    { id: 'RSC_07', name: '황금 왕관', type: 'Resource', base_value: 250, target: 'Player', cost: 2500, unlocked: false, requiredLevel: 20, src: goldPocketImg },
+    { id: 'SWD_07', name: '영웅의 검', type: 'Attack', base_value: 60, damage_type: 'Holy', cost: 1600, unlocked: false, requiredLevel: 30, src: heroSwordImg },
+    { id: 'SWD_08', name: '전설의 검', type: 'Attack', base_value: 75, damage_type: 'Physical', cost: 2200, unlocked: false, requiredLevel: 30, src: legendSwordImg },
+    { id: 'SHD_07', name: '전설의 방패', type: 'Defense', base_value: 32, target: 'Player', cost: 1900, unlocked: false, requiredLevel: 30, src: legendShieldImg },
+    { id: 'MSK_01', name: '전투 가면', type: 'Defense', base_value: 6, target: 'Player', cost: 300, unlocked: false, requiredLevel: 30, src: battleMaskImg },
+    { id: 'MSK_02', name: '마법 가면', type: 'Defense', base_value: 15, target: 'Player', cost: 750, unlocked: false, requiredLevel: 30, src: magicMaskImg },
+    { id: 'RSC_07', name: '황금 왕관', type: 'Resource', base_value: 250, target: 'Player', cost: 2500, unlocked: false, requiredLevel: 30, src: goldPocketImg },
 ];
 
 // console.log(../assets/image/monster/chapter1/goblin.png);
@@ -117,8 +117,8 @@ export const equipmentMap = equipment.reduce((map, item) => {
 export const monsters = [
     // 챕터 1 (스테이지 1-10) - 초급 몬스터
     {type: 'goblin', icon: '👺' ,hp: 40, df: 0, atk: 5, attackCount: 1, turnAtkIncrease: 1, chapter: 1, goldReward: 40, expReward: 5, src: goblinImg }, 
-    {type: 'slime', icon: '🟢', hp: 60, goblinImg, df: 2, atk: 5, attackCount: 2, turnAtkIncrease: 2, chapter: 1, goldReward: 50, expReward: 6, src: slimeImg },
-    {type: 'bat', icon: '🦇', hp: 50, goblinImg ,df: 0, atk: 7, attackCount: 3, turnAtkIncrease: 1, chapter: 1, goldReward: 45, expReward: 7, src: batImg },
+    {type: 'slime', icon: '🟢', hp: 60, goblinImg, df: 2, atk: 5, attackCount: 2, turnAtkIncrease: 2, chapter: 1, goldReward: 50, expReward: 8, src: slimeImg },
+    {type: 'bat', icon: '🦇', hp: 50, goblinImg ,df: 0, atk: 7, attackCount: 3, turnAtkIncrease: 1, chapter: 1, goldReward: 45, expReward: 6, src: batImg },
     
     // 챕터 2 (스테이지 11-20) - 중급 몬스터
     {type: 'skeleton', icon: '💀', hp: 95, df: 8, atk: 16, attackCount: 1, turnAtkIncrease: 3, chapter: 2, goldReward: 70, expReward: 10, src: skeletonImg },

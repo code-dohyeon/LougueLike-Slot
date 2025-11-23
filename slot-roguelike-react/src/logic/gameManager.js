@@ -48,6 +48,26 @@ class GameManager {
                 weapon.unlocked = true;
             }
         });
+
+        this.allEquipment.forEach(item => {
+            // 1. requiredLevel이 0인 기본 무기는 InitialSetup.jsx에서 처리할 수 있도록 내버려 두거나, 
+            //    혹은 여기에 명시적으로 포함해도 됨. (여기서는 InitialSetup.jsx의 필터링에 의존한다고 가정)
+            
+            // 2. this.unlockedWeapons 배열에 ID가 포함되어 있으면 해금
+            if (this.unlockedWeapons.includes(item.id)) { // item.id가 string인지 number인지 확인 필요
+                item.unlocked = true;
+            }
+            
+            // 💡 [선택] requiredLevel이 0인 무기를 여기서 명시적으로 해금 (안전장치)
+            if (item.requiredLevel === 0) {
+                item.unlocked = true;
+            }
+            
+            // 🚨 [제거해야 하는 부분] 이전 버그 코드:
+            // if (item.requiredLevel > 0 && item.requiredLevel <= this.playerLevel) {
+            //     item.unlocked = true; // 이 코드가 문제였어! 매 로드마다 다 열어버림.
+            // }
+        });
         
         console.log('Loaded progress - Level:', this.playerLevel, 'EXP:', this.playerExp);
         console.log('Unlocked weapons:', this.allEquipment.filter(w => w.unlocked).map(w => w.name));
