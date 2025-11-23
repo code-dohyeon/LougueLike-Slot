@@ -66,7 +66,7 @@ export const equipment = [
     
     // 레벨 2 해금 무기 (스테이지 1-10)
     { id: 'DGR_01', name: '독 단검', type: 'Attack', base_value: 6, damage_type: 'Poison', cost: 100, unlocked: false, requiredLevel: 1, src: poisonDaggerImg }, 
-    { id: 'AXE_01', name: '양날 도끼', type: 'Attack', base_value: 12, damage_type: 'Physical', cost: 200, unlocked: false, requiredLevel: 1, src: steelAxeImg },
+    { id: 'AXE_01', name: '양날 도끼', type: 'Attack', base_value: 15, damage_type: 'Physical', cost: 200, unlocked: false, requiredLevel: 1, src: steelAxeImg },
     { id: 'SHD_02', name: '강철 방패', type: 'Defense', base_value: 8, target: 'Player', cost: 250, unlocked: false, requiredLevel: 1, src: steelShieldImg },
     { id: 'RSC_02', name: '은화 주머니', type: 'Resource', base_value: 18, target: 'Player', cost: 150, unlocked: false, requiredLevel: 1, src: silverCoinImg },
     

@@ -136,7 +136,7 @@ class GameManager {
     gainExperience(expAmount) {
         this.playerExp += expAmount;
         const newLevel = Math.floor(this.playerExp / 100);
-        // console.log("Gained EXP:", expAmount, "Total EXP:", this.playerExp, "New Level:", newLevel);
+        console.log("Gained EXP:", expAmount, "Total EXP:", this.playerExp, "New Level:", newLevel);
         
         if (newLevel > this.playerLevel) {
             this.playerLevel = newLevel;
