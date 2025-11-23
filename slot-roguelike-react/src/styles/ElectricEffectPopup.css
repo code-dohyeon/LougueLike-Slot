@@ -1,64 +1,41 @@
-/* src/components/ElectricEffectPopup.css */
-.electric-effect-popup {
-    position: absolute; /* App.jsx의 부모 요소에 relative 필요 */
-    /* top, left는 JS에서 position prop으로 설정 */
-    color: #fff;
-    font-size: 2.5em; /* 텍스트 크기 */
-    font-weight: bold;
-    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff; /* 네온 효과 */
-    animation: electricPopIn 0.3s ease-out forwards,
-               electricPulse 0.1s infinite alternate 0.3s, /* 번개 깜빡임 */
-               electricFadeOut 0.7s ease-in 0.3s forwards; /* 서서히 사라짐 */
-    opacity: 0;
-    pointer-events: none; /* 클릭 방지 */
-}
+/* src/styles/ElectricEffectPopup.css */
 
-@keyframes electricPopIn {
-    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-    80% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-}
-
-@keyframes electricPulse {
-    0% { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff; }
-    50% { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff; } /* 잠깐 밝게 */
-    100% { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff; }
-}
-
-@keyframes electricFadeOut {
-    0% { opacity: 1; }
-    100% { opacity: 0; transform: translate(-50%, -70%) scale(0.8); } /* 위로 살짝 이동하며 사라짐 */
-}
-
-/* 스파크 효과 (선택 사항, 더 복잡한 애니메이션 가능) */
-.spark {
+/* ... (기존 .electric-effect-container 스타일은 유지) ... */
+.electric-effect-container {
     position: absolute;
-    background-color: #00ffff; /* 전기 색상 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    pointer-events: none;
+    display: flex; /* 텍스트가 사라졌으므로 flex 관련 속성은 필요 없지만, 스파크 위치 조정을 위해 유지할 수 있음 */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: electric-fade-out 1s forwards; 
+}
+
+.electric-spark {
+    position: absolute;
+    background-color: #fff;
     border-radius: 50%;
     opacity: 0;
-    animation: sparkEffect 0.5s ease-out forwards;
+    box-shadow: 0 0 5px #00ffff, 0 0 15px rgba(0, 255, 255, 0.7), 0 0 30px rgba(0, 255, 255, 0.5);
+    animation: spark-burst 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-.spark-1 { width: 5px; height: 5px; left: 10%; top: 0%; animation-delay: 0.1s; }
-.spark-2 { width: 7px; height: 7px; right: 5%; bottom: 10%; animation-delay: 0.2s; }
-.spark-3 { width: 4px; height: 4px; left: 20%; bottom: 5%; animation-delay: 0.3s; }
+.spark-1 { animation-delay: 0.1s; width: 15px; height: 3px; transform: rotate(45deg); }
+.spark-2 { animation-delay: 0.2s; width: 10px; height: 10px; }
+.spark-3 { animation-delay: 0.3s; width: 12px; height: 4px; transform: rotate(-45deg); }
 
-@keyframes sparkEffect {
-    0% { transform: scale(0) translate(0, 0); opacity: 1; }
-    100% { transform: scale(1) translate(calc(var(--rand-x) * 1px), calc(var(--rand-y) * 1px)); opacity: 0; }
-}
-/* 스파크의 무작위 위치를 위해 JS에서 --rand-x, --rand-y CSS 변수 설정 가능 */
-
-/* ELECTRIC 텍스트 자체에 적용되는 효과 */
-.electric-text {
-    display: inline-block; /* transform을 적용하기 위함 */
-    animation: electricShake 0.1s infinite alternate; /* 텍스트 떨림 */
+@keyframes electric-fade-out {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.05); }
 }
 
-@keyframes electricShake {
-    0% { transform: translateX(0px) translateY(0px); }
-    25% { transform: translateX(1px) translateY(-1px); }
-    50% { transform: translateX(-1px) translateY(1px); }
-    75% { transform: translateX(1px) translateY(1px); }
-    100% { transform: translateX(-1px) translateY(-1px); }
+@keyframes spark-burst {
+    0% { opacity: 0.8; transform: scale(0); }
+    50% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.5); }
 }

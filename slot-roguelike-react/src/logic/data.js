@@ -117,7 +117,7 @@ export const equipmentMap = equipment.reduce((map, item) => {
 export const monsters = [
     // 챕터 1 (스테이지 1-10) - 초급 몬스터
     {type: 'goblin', icon: '👺' ,hp: 40, df: 0, atk: 5, attackCount: 1, turnAtkIncrease: 1, chapter: 1, goldReward: 40, expReward: 5, src: goblinImg }, 
-    {type: 'slime', icon: '🟢', hp: 65, goblinImg, df: 3, atk: 8, attackCount: 2, turnAtkIncrease: 2, chapter: 1, goldReward: 50, expReward: 6, src: slimeImg },
+    {type: 'slime', icon: '🟢', hp: 60, goblinImg, df: 2, atk: 5, attackCount: 2, turnAtkIncrease: 2, chapter: 1, goldReward: 50, expReward: 6, src: slimeImg },
     {type: 'bat', icon: '🦇', hp: 50, goblinImg ,df: 0, atk: 7, attackCount: 3, turnAtkIncrease: 1, chapter: 1, goldReward: 45, expReward: 7, src: batImg },
     
     // 챕터 2 (스테이지 11-20) - 중급 몬스터

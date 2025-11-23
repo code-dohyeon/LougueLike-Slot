@@ -29,7 +29,7 @@ const ElectricEffectPopup = ({ active, position = { x: 50, y: 50 } }) => {
 
     return (
         <div className="electric-effect-popup" style={popupStyle}>
-            <span className="electric-text">ELECTRIC!</span>
+            {/* <span className="electric-text">ELECTRIC!</span> */}
             {/* 추가적인 스파크/번개 이펙트 요소를 CSS로 구현 */}
             <div className="spark spark-1"></div>
             <div className="spark spark-2"></div>

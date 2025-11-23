@@ -49,8 +49,8 @@ class GameManager {
             }
         });
         
-        // console.log('Loaded progress - Level:', this.playerLevel, 'EXP:', this.playerExp);
-        // console.log('Unlocked weapons:', this.allEquipment.filter(w => w.unlocked).map(w => w.name));
+        console.log('Loaded progress - Level:', this.playerLevel, 'EXP:', this.playerExp);
+        console.log('Unlocked weapons:', this.allEquipment.filter(w => w.unlocked).map(w => w.name));
     }
     
     saveProgress() {
