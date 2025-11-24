@@ -183,21 +183,28 @@ class GameManager {
         return this.shopInventory;
     }
 
-    calculateMultiplier(resultArray) {
-        let comboCheck = 0;
+    getSlotMultipliers(slotResults) {
+        const minComboLength = 3;
+        const multipliers = new Array(slotResults.length).fill(1.0); // 기본은 1.0배
         
-        for(let i = 0; i < resultArray.length - 1; i++) {
-            if(resultArray[i].id === resultArray[i+1].id) { 
-                comboCheck++;
-                if(comboCheck >= 2) {
-                    return 3.0; 
-                }
-            } else {
-                comboCheck = 0;
+        // 3개 연속 같은 ID를 찾는 로직
+        for (let i = 0; i <= slotResults.length - minComboLength; i++) {
+            const item1Id = slotResults[i].id;
+            const item2Id = slotResults[i + 1].id;
+            const item3Id = slotResults[i + 2].id;
+
+            // 3개의 ID가 모두 같고, 아직 3.0배로 설정되지 않았다면 콤보 적용
+            if (item1Id === item2Id && item2Id === item3Id) {
+                // 이 콤보에 포함된 3칸에 3.0배 적용 (중복 적용 방지를 위해 3.0보다 작을 때만)
+                if (multipliers[i] < 3.0) multipliers[i] = 3.0;
+                if (multipliers[i + 1] < 3.0) multipliers[i + 1] = 3.0;
+                if (multipliers[i + 2] < 3.0) multipliers[i + 2] = 3.0;
+                
+                // 4개, 5개 연속 콤보가 발생해도 이 로직으로 모두 처리됨.
             }
         }
-        
-        return 1.0;
+
+        return multipliers; // 예: [3.0, 3.0, 3.0, 1.0, 1.0]
     }
 
     checkCombo(slotResults) {
@@ -268,8 +275,26 @@ class GameManager {
         } else if (damage_type === 'Magic') {
             // Magic: 쉴드 무시하고 체력에 직접 피해
             actualDamageTaken = this.currentMonster.takeDamage(damage, true); // true: 쉴드 무시
-        } else {
-            // Physical, Poison, Fire, Ice, Lightning 등 일반 공격
+        } else if (damage_type === 'Poison') { 
+            // 독 단검은 순수 도트딜
+            actualDamageTaken = 0; 
+        } else if (damage_type === 'Fire') {
+            // 💡 [최종 수정 A] Fire: 때릴 때는 오직 물리 데미지만 적용!
+            const physicalDamage = damage; // 슬롯의 기본 데미지(damage)를 물리로
+            const fireDotDamageValue = Math.floor(damage * 0.5); // 턴당 도트딜 값 (50%로 설정)
+            
+            // 1. 몬스터에게 물리 데미지를 입힘
+            const physicalDamageTaken = this.currentMonster.takeDamage(physicalDamage); 
+            
+            // 2. 속성 보너스 데미지(fireBonusDamage) 적용 로직은 삭제!
+
+            // 3. 도트 데미지 값만 임시 변수에 저장하여 item.js로 전달할 준비
+            this.tempFirePhysicalDamage = physicalDamageTaken;
+            this.tempFireElementDamage = fireDotDamageValue; // 💡 도트딜 값만 저장
+            actualDamageTaken = physicalDamageTaken; // 총 피해량은 물리 피해량과 동일
+        }
+        else {
+            // Physical, Ice, Lightning 등 일반 공격
             actualDamageTaken = this.currentMonster.takeDamage(damage);
         }
 
@@ -278,14 +303,19 @@ class GameManager {
             [itemResult], // Attack 타입이 item.js로 들어감
             this.currentMonster,
             this.player,
-            multiplier
+            multiplier,
+            this.tempFireElementDamage,
         );
 
         // 3. 반환값 정리 (Attack 타입)
         const result = {
-            physicalDamage: damage_type === 'Physical' ? actualDamageTaken : 0,
+            // 💡 [최종 확인] Physical 데미지는 'Physical' 또는 'Fire'의 물리 부분만 할당!
+            // Fire의 물리 부분(tempFirePhysicalDamage)을 할당해야 팝업이 뜹니다.
+            physicalDamage: (damage_type === 'Physical' || damage_type === 'Fire') ? actualDamageTaken : 0,
             poisonDamage: damage_type === 'Poison' ? actualDamageTaken : 0, 
-            fireDamage: damage_type === 'Fire' ? actualDamageTaken : 0,
+            // 💡 [최종 수정 C] Fire 평타 시에는 0으로 할당! (속성 데미지는 도트딜로만)
+            fireDamage: 0,
+            fireElementDamage: this.tempFireElementDamage,
             iceDamage: damage_type === 'Ice' ? actualDamageTaken : 0,
             lightningDamage: damage_type === 'Lightning' ? actualDamageTaken : 0,
             holyDamage: damage_type === 'Holy' ? actualDamageTaken : 0,

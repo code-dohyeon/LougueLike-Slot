@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { equipment } from '../logic/data';
+import '../styles/ComboEffect.css'
 
 // 릴이 돌아갈 때 표시될 모든 아이콘 목록을 정의합니다.
 // (data.js에 있는 모든 장비의 icon 값을 여기에 넣어주세요)
@@ -8,7 +9,7 @@ const ALL_ICONS = [];
     //   console.log(ALL_ICONS);
 
 
-function SlotReel({ icon, isSpinning, isProcessing }) {
+function SlotReel({ icon, isSpinning, isProcessing, isComboActive}) {
     // Spinning 상태일 때 보여줄 무작위 아이콘 스트립을 한 번만 생성합니다.
     const spinningReelContent = useMemo(() => {
         const reelLength = 20; // 릴 스트립에 들어갈 아이콘의 개수 (길수록 애니메이션이 자연스러워집니다)
@@ -24,8 +25,15 @@ function SlotReel({ icon, isSpinning, isProcessing }) {
         return content;
     }, [isSpinning]); // isSpinning 상태가 바뀔 때만 다시 생성
 
+    // 💡 [확인] 이 변수에 combo-active가 들어가는지!
+    const containerClasses = [
+        'slot-reel-container',
+        isProcessing ? 'is-processing' : '',
+        isComboActive ? 'combo-active' : '' 
+    ].filter(Boolean).join(' '); // 빈 문자열은 제거하고 공백으로 연결
+
     return (
-        <div className={`slot-reel-container ${isProcessing ? 'is-processing' : ''}`}>
+        <div className={containerClasses}>
             <div className={`slot-reel ${isSpinning ? 'spinning' : ''}`}>
                 {isSpinning ? (
                     // 💡 Spinning 중: 무작위 아이콘들의 띠(strip)를 보여주고 CSS 애니메이션으로 돌립니다.

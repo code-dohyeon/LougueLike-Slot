@@ -6,7 +6,7 @@ class Item {
     }
 
     // 💡 이 함수는 이제 '데미지 적용' 대신 '상태 이상 및 버프 적용'에 집중
-    processSlotResult(resultArray, target, player, multiplier) {
+    processSlotResult(resultArray, target, player, multiplier, fireDotDamage) {
         this.multiplier = multiplier;
 
         // 데미지 관련 변수 제거 (데미지는 gameManager에서 처리)
@@ -37,7 +37,7 @@ class Item {
                         case 'Fire': // 불: 때릴 때 데미지 + 몬스터 턴에 도트딜
                             target.applyStatusEffect({
                                 type: 'Fire',
-                                damage: value,
+                                damage: fireDotDamage,
                                 duration: 3
                             });
                             break;

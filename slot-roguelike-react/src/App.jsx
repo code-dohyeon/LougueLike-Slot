@@ -48,6 +48,8 @@ function App() {
         setComboTriggered,
         electricEffectTriggered,
         setElectricEffectTriggered,
+        comboActiveSlotIndexes,
+        fireElementDamage,
     } = useGame();
 
     const [showStartScreen, setShowStartScreen] = useState(true);
@@ -146,7 +148,7 @@ function App() {
                 />
             )}
 
-            <ComboEffect active={comboTriggered} />
+            {comboTriggered && <ComboEffect active={comboTriggered} />}
             <ElectricEffectPopup active={electricEffectTriggered} position={{ x: 50, y: 35 }} /> {/* 💡 [추가] 렌더링 확인 */}
 
             {gameState === 'Combat' && (
@@ -157,6 +159,7 @@ function App() {
                                 monster={monsterState} 
                                 monsterImage={[...monsters, ...bosses]}
                                 damagePopups={monsterDamagePopups}
+                                fireElementDamage={fireElementDamage}
                             />
                         </div>
 
@@ -173,6 +176,8 @@ function App() {
                                 isSpinning={isSpinning}
                                 currentlyProcessingSlotIndex={currentlyProcessingSlotIndex}
                                 currentEquipment={playerState.equippedWeapons}
+                                // 💡 [핵심 수정] 콤보 활성 인덱스 prop 전달
+                                comboActiveSlotIndexes={comboActiveSlotIndexes}
                             />
 
                             <SpinButton 

@@ -28,13 +28,20 @@ export const useGame = () => {
     const [resourcePopups, setResourcePopups] = useState([]);
     const [showInventory, setShowInventory] = useState(false);
     const [electricEffectTriggered, setElectricEffectTriggered] = useState(false);
-// 💡 콤보 이펙트 상태 추가
+    // 💡 콤보 이펙트 상태 추가
     const [comboTriggered, setComboTriggered] = useState(false);
+    // 💡 [새로운 상태 추가] 콤보가 발생한 슬롯들의 인덱스를 저장할 배열
+    const [comboActiveSlotIndexes, setComboActiveSlotIndexes] = useState([]);
+    const [fireElementDamage] = useState([])
 
     const syncGameState = () => {
         setGameState(game.gameState);
         setPlayerState({ ...game.player });
-        setMonsterState(game.currentMonster ? { ...game.currentMonster } : null);
+        setMonsterState(game.currentMonster ? { 
+            // 💡 [수정 2-1] 몬스터의 모든 정보와 상태이상 배열을 명시적으로 복사
+            ...game.currentMonster,
+            statusEffects: game.currentMonster.statusEffects ? [...game.currentMonster.statusEffects] : []
+        } : null);
         setStage(game.stage);
         setShopInventory([...game.shopInventory]);
     };
@@ -45,13 +52,14 @@ export const useGame = () => {
         setIsSpinning(true);
         setIsBlocked(true);
         setComboTriggered(false); // 💡 새 턴 시작 시 콤보 상태 초기화
+        setComboActiveSlotIndexes([]); // 💡 [추가] 콤보 인덱스도 초기화
 
         try {
             setSlotResults(null);
             setCurrentlyProcessingSlotIndex(-1);
             
             const results = game.slotMachine.spin(game.player.slotCount);
-            const multiplier = game.calculateMultiplier(results);
+            const multipliers = game.getSlotMultipliers(results);
 
             await delay(SPIN_DURATION);
 
@@ -59,8 +67,18 @@ export const useGame = () => {
             setIsSpinning(false);
             await delay(RESULT_SHOW_DELAY);
 
-            if (game.checkCombo(results)) {
-                setComboTriggered(true); // 콤보 성공!
+            // 💡 [수정] 콤보 트리거는 멀티플라이어 배열에 1.0보다 큰 값이 있는지로 판단
+            const activeComboIndexes = [];
+            multipliers.forEach((m, index) => {
+                if (m > 1.0) {
+                    activeComboIndexes.push(index); // 콤보 보너스를 받는 슬롯의 인덱스 저장
+                }
+            });
+
+            // 💡 [핵심 누락 코드 추가!] 콤보 상태 설정
+            if (activeComboIndexes.length > 0) {
+                setComboTriggered(true); // 텍스트 팝업 (Chritical! X3)을 띄우기 위해
+                setComboActiveSlotIndexes(activeComboIndexes); // 릴 이펙트를 위해
             }
 
             await delay(ACTION_DELAY);
@@ -70,6 +88,8 @@ export const useGame = () => {
                 setCurrentlyProcessingSlotIndex(i);
                 
                 const itemResult = results[i];
+                // 💡 [핵심 수정] 해당 슬롯의 멀티플라이어를 사용
+                const multiplier = multipliers[i]; 
                 const result = game.processSingleSlotResult(itemResult, multiplier);
                 
                 syncGameState();
@@ -258,8 +278,9 @@ export const useGame = () => {
         } finally {
             setIsSpinning(false);
             setIsBlocked(false);
+            setCurrentlyProcessingSlotIndex(-1);
         }
-    }, [gameState, isSpinning, isBlocked, game]);
+    }, [isSpinning, isBlocked, gameState, game, syncGameState]);
 
     const goToNextStage = () => {
         game.gameState = 'Combat';
@@ -393,6 +414,9 @@ export const useGame = () => {
         comboTriggered,
         setComboTriggered,
         electricEffectTriggered,
-        setElectricEffectTriggered
+        setElectricEffectTriggered,
+        comboTriggered,
+        comboActiveSlotIndexes,
+        fireElementDamage,
     };
 };

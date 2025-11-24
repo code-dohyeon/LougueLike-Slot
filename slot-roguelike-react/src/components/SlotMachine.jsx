@@ -4,7 +4,7 @@ import SlotReel from './SlotReel';
 import { equipmentMap, equipment } from '../logic/data';
 
 // 💡 매개변수에 currentEquipment를 추가해!
-function SlotMachine({ slotCount, slotResults, isSpinning, currentlyProcessingSlotIndex, currentEquipment }) {
+function SlotMachine({ slotCount, slotResults, isSpinning, currentlyProcessingSlotIndex, currentEquipment, comboActiveSlotIndexes }) {
     const reels = [];
     // console.log(currentEquipment);
     
@@ -42,6 +42,7 @@ function SlotMachine({ slotCount, slotResults, isSpinning, currentlyProcessingSl
                 icon={icon}
                 isSpinning={isSpinning}
                 isProcessing={isProcessing}
+                isComboActive={comboActiveSlotIndexes.includes(i)}
             />
         );
     }

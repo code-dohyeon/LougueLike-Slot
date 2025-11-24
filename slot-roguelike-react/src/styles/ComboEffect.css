@@ -36,6 +36,15 @@
 .sparkle-2 { animation-delay: 0.2s; width: 8px; height: 8px; }
 .sparkle-3 { animation-delay: 0.3s; width: 12px; height: 12px; }
 
+/* 💡 [추가] 릴 컨테이너에 적용할 콤보 시각 효과 */
+.slot-reel-container.combo-active {
+    border: 3px solid gold; /* 황금색 테두리 추가 */
+    border-radius: 8px;
+    box-shadow: 0 0 15px gold, 0 0 25px yellow; /* 빛나는 효과 */
+    transition: all 0.2s ease-out;
+    animation: comboPulse 0.8s infinite alternate; /* 깜빡이는 애니메이션 */
+}
+
 /* 애니메이션 키프레임 */
 @keyframes combo-appear {
     0% { transform: scale(0); opacity: 0; }
@@ -53,4 +62,16 @@
     0% { opacity: 0; transform: scale(0); }
     30% { opacity: 1; transform: scale(1.5); }
     100% { opacity: 0; transform: scale(0); }
+}
+
+@keyframes comboPulse {
+    from { 
+        transform: scale(1.0); 
+        opacity: 0.9;
+    }
+    to { 
+        transform: scale(1.02); 
+        opacity: 1.0;
+        box-shadow: 0 0 20px gold, 0 0 35px yellow;
+    }
 }
