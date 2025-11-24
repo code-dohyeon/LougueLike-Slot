@@ -36,13 +36,13 @@ function Shop({
                         id="upgrade-hp-btn" 
                         className="btn btn-upgrade"
                         onClick={onUpgradeHp}
-                        disabled={player.gold < 50}
+                        disabled={player.gold < 30}
                         data-testid="button-upgrade-hp"
                     >
                         <div className="btn-icon">❤️</div>
                         <div className="btn-text">
                             <div>최대 HP +10</div>
-                            <div className="btn-cost">50 Gold</div>
+                            <div className="btn-cost">30 Gold</div>
                         </div>
                     </button>
 
